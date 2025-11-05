@@ -1,8 +1,10 @@
-package io.github.neaproject.physics;
+package io.github.neaproject.physics.shape;
 
 import com.badlogic.gdx.math.Vector2;
+import io.github.neaproject.physics.BoundingBox;
+import io.github.neaproject.physics.Polygon;
 
-public class BoxShape extends Shape{
+public class BoxShape extends Shape {
     private float width, height;
 
     public BoxShape(float width, float height) {
