@@ -1,11 +1,9 @@
 package io.github.neaproject.physics;
 
 import com.badlogic.gdx.math.Vector2;
+import io.github.neaproject.physics.shape.Shape;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class RigidBody  extends Particle {
+public class RigidBody extends Particle {
 
     private Shape shape;
 
@@ -49,24 +47,18 @@ public class RigidBody  extends Particle {
 
     public Vector2 get_centre_of_mass() {
 
-        List<MassPoint> mass_points = new ArrayList<MassPoint>(0);
-        Vector2[] vertices = {
-            new Vector2(1,0),
-            new Vector2(1,0.25f),
-            new Vector2(1,0.5f),
-            new Vector2(1,0.75f),
-            new Vector2(1,1),
-            new Vector2(3,1),
-            new Vector2(30,0)
-        };
+        Vector2[] vertices = shape.get_polygon().vertices();
+        int triangle_count = vertices.length - 2;
 
-        for (int i=1; i<vertices.length-1; i++) {
+        Vector2[] centroids = new Vector2[triangle_count];
+        float[] masses = new float[triangle_count];
 
-            Vector2[] v = {vertices[0].cpy(), vertices[i].cpy(), vertices[i + 1].cpy()};
+        for (int i=0; i<triangle_count; i++) {
 
+            Vector2[] v = {vertices[0].cpy(), vertices[i+1].cpy(), vertices[i + 2].cpy()};
             Vector2 midpoint = calc_midpoint(v);
 
-            float area = 0.5f * Math.abs(
+            float area = 0.5f * (
                 v[0].x * (v[1].y-v[2].y) +
                 v[1].x * (v[2].y-v[0].y) +
                 v[2].x * (v[0].y-v[1].y)
@@ -76,34 +68,21 @@ public class RigidBody  extends Particle {
             if (area==0) {
                 continue;
             }
-            mass_points.add(new MassPoint(area, midpoint));
+
+            centroids[i] = midpoint;
+            masses[i] = area;
         }
 
-
-        while(mass_points.size()>1) {
-
-            MassPoint mp1 = mass_points.get(0);
-            MassPoint mp2 = mass_points.get(1);
-
-            Vector2 p1 = mp1.point.cpy();
-            Vector2 p2 = mp2.point.cpy();
-
-            // lerp between mp1 & mp2 with t being the ratio between their masses
-            float t = mp1.mass / (mp1.mass  + mp2.mass);
-
-            Vector2 mass_centre = p1.scl(t).mulAdd(p2, (1-t));
-
-            mass_points.remove(1);
-            mass_points.remove(0);
-            mass_points.add(new MassPoint(
-                mp1.mass + mp2.mass,
-                mass_centre
-            ));
+        // weighted average of each triangles' centroids
+        Vector2 sum_centroids = new Vector2(0,0);
+        float sum_masses = 0;
+        for (int i=0; i<triangle_count; i++) {
+            sum_centroids.mulAdd(centroids[i], masses[i]);
+            sum_masses += masses[i];
         }
 
-        return mass_points.get(0).point.cpy();
+        return sum_centroids.scl(1f/sum_masses);
     }
-
 
     public Polygon get_polygon() {
 
@@ -111,20 +90,24 @@ public class RigidBody  extends Particle {
         Vector2[] vertices = shape.get_polygon().vertices();
         int vert_count = vertices.length;
 
-        float sina = (float) Math.sin(orientation);
-        float cosa = (float) Math.cos(orientation);
+        float sina = (float) Math.sin(-orientation);
+        float cosa = (float) Math.cos(-orientation);
 
         Vector2[] rotated_verts = new Vector2[vert_count];
         for (int i=0; i<vert_count; i++) {
             rotated_verts[i] = new Vector2(
                 (vertices[i].x-centre_of_mass.x)*cosa - (vertices[i].y-centre_of_mass.y)*sina,
                 (vertices[i].y-centre_of_mass.y)*cosa + (vertices[i].x-centre_of_mass.x)*sina);
+
+            rotated_verts[i].add(this.position);
+            rotated_verts[i].add(centre_of_mass);
         }
 
         return new Polygon(rotated_verts);
     }
 
-
-
-
+    public void physics_tick(float deltaT) {
+        super.particle_tick(deltaT);
+        orientation += angular_velocity * deltaT;
+    }
 }
