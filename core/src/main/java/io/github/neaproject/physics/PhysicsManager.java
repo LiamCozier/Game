@@ -32,22 +32,35 @@ public class PhysicsManager {
         return edges;
     }
 
-    public static Vector2[] get_polygon_normals(Polygon p) {
+    public static Vector2[] get_polygon_normals(Polygon... polygons) {
 
-        Vector2[] edges = get_polygon_edges(p);
-        int edge_count = edges.length;
-        Vector2[] normals = new Vector2[edge_count];
-
-        System.out.print("N=");
-        for (int i=0; i<edge_count; i++) {
-            normals[i] = new Vector2(-edges[i].y, edges[i].x);
-            normals[i].nor();
-            System.out.print(normals[i].toString());
-            if (i+1!=edge_count) System.out.print(",");
+        int edge_count = 0;
+        for (Polygon p:polygons) {
+            edge_count += p.vertices().length;
         }
-        System.out.println();
+
+        Vector2[] normals = new Vector2[edge_count];
+        int i = 0;
+        for (Polygon p:polygons) {
+            Vector2[] edges = get_polygon_edges(p);
+
+            for (int j = 0; j < edges.length; j++) {
+                normals[i] = new Vector2(-edges[j].y, edges[j].x);
+                normals[i].nor();
+                i++;
+            }
+        }
 
         return normals;
+    }
+
+    public static boolean ranges_overlap(float[] r1, float[] r2) {
+        return r1[1] >= r2[0] && r2[1] >= r1[0];
+    }
+
+    public static boolean SAT_overlap(Polygon p1, Polygon p2) {
+        Vector2[] axis = get_polygon_normals(p1, p2);
+        return true;
     }
 
 }
