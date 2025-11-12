@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
+import io.github.neaproject.physics.CollisionManifold;
 import io.github.neaproject.physics.Polygon;
 import io.github.neaproject.physics.shape.BoxShape;
 import io.github.neaproject.physics.PhysicsManager;
@@ -24,7 +25,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
 
-        float height = 10;
+        float height = 5;
         float ppu = Gdx.graphics.getHeight() / height;
         float width = Gdx.graphics.getWidth() / ppu;
         camera = new OrthographicCamera(width, height);
@@ -32,27 +33,27 @@ public class Main extends ApplicationAdapter {
         sr = new ShapeRenderer();
 
         box1 = new RigidBody(
-            new Vector2(-2.75f, 5),
-            Vector2.Zero.cpy(),
-            new BoxShape(5, 5),
+            new Vector2(-0f, 5),
+            new Vector2(0f, -1f),
+            new BoxShape(1, 1),
             (float)Math.PI*0f,
-            (float)Math.PI*1f,
+            (float)Math.PI*0.25f,
             1
         );
 
         box2 = new RigidBody(
-            new Vector2(2.75f, 5),
+            new Vector2(0, -0.5f),
             Vector2.Zero.cpy(),
-            new BoxShape(5, 5),
+            new BoxShape(10, 1),
             (float)Math.PI*0f,
-            (float)Math.PI*0f,
+            (float)Math.PI*-0.01f,
             1
         );
     }
 
     @Override
     public void render() {
-        float deltaT = Gdx.graphics.getDeltaTime() / 10f;
+        float deltaT = Gdx.graphics.getDeltaTime();
         box1.physics_tick(deltaT);
         box2.physics_tick(deltaT);
 
@@ -66,7 +67,19 @@ public class Main extends ApplicationAdapter {
         Polygon p2 = box2.get_polygon();
 
         sr.setColor(Color.WHITE);
-        if (PhysicsManager.SAT_overlap(p1, p2)) sr.setColor(Color.GREEN);
+        CollisionManifold cm = PhysicsManager.SAT_overlap(p1, p2);
+        if (cm.minimum_penetration_depth > 0) {
+            System.out.println(cm.contact_points.length);
+            sr.setColor(Color.RED);
+            for (Vector2 cv: cm.contact_points) sr.polygon(new float[]{
+                cv.x + 0.025f, cv.y + 0.025f,
+                cv.x + 0.025f, cv.y - 0.025f,
+                cv.x - 0.025f, cv.y - 0.025f,
+                cv.x - 0.025f, cv.y + 0.025f
+            });
+            sr.setColor(Color.GREEN);
+            box1.position.mulAdd(cm.collision_normal, -cm.minimum_penetration_depth);
+        }
 
         sr.polygon(box1.get_polygon().get_float_array());
         sr.polygon(box2.get_polygon().get_float_array());
