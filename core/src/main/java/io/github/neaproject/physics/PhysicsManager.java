@@ -124,14 +124,12 @@ public class PhysicsManager {
             cf_ref = cf1;
             incident = p2;
             cf_inc = cf2;
-            System.out.println("ref: p1 inc: p2");
         } else {
             reference = p2;
             cf_ref = cf2;
             incident = p1;
             cf_inc = cf1;
             flip = true;
-            System.out.println("ref: p2 inc: p1");
         }
 
         Vector2 v1 = reference.vertices()[cf_ref.edge_start_index];
@@ -177,10 +175,21 @@ public class PhysicsManager {
 
         for (Vector2 p : clipped) {
             float separation = ref_normal.dot(p) - ref_offset;
-            if (separation <= pen_depth + 0) {
+            if (separation <= pen_depth + 1e-4f) {
                 contacts.add(p.cpy());
             }
         }
+
+        // merge arbitrarily close contact points
+        if (contacts.size() == 2) {
+            float separationAlongRef = contacts.get(0).cpy().sub(contacts.get(1)).dot(edge_dir);
+            if (Math.abs(separationAlongRef) < 1e-1f) {
+                Vector2 merged = contacts.get(0).cpy().add(contacts.get(1)).scl(0.5f);
+                contacts.clear();
+                contacts.add(merged);
+            }
+        }
+
 
 
         return contacts.toArray(new Vector2[0]);
@@ -228,12 +237,16 @@ public class PhysicsManager {
         Vector2 prev_edge_direction = support_vertex.cpy().sub(vertices[(support_index-1+edge_count)%edge_count]);
         Vector2 next_edge_direction = vertices[(support_index+1)%edge_count].cpy().sub(support_vertex);
 
-        float prev_dot = prev_edge_direction.dot(collision_normal);
-        float next_dot = next_edge_direction.dot(collision_normal);
-
         Vector2 edge_direction;
         int edge_start_index, edge_end_index;
-        if (Math.abs(prev_dot) < Math.abs(next_dot)) {
+
+        Vector2 prev_face_normal = new Vector2(-prev_edge_direction.y, prev_edge_direction.x).nor();
+        Vector2 next_face_normal = new Vector2(-next_edge_direction.y, next_edge_direction.x).nor();
+
+        float prev_dot = prev_face_normal.dot(collision_normal);
+        float next_dot = next_face_normal.dot(collision_normal);
+
+        if (prev_dot > next_dot) {
             edge_direction = prev_edge_direction.cpy().nor();
             edge_start_index = (support_index - 1 + edge_count) % edge_count;
             edge_end_index   = support_index;
