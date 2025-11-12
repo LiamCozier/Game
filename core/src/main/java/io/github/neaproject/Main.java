@@ -33,29 +33,34 @@ public class Main extends ApplicationAdapter {
         sr = new ShapeRenderer();
 
         box1 = new RigidBody(
-            new Vector2(-0f, 5),
-            new Vector2(0f, -1f),
+            new Vector2(-0f, 0.8f),
+            new Vector2(0f, -0.5f),
             new BoxShape(1, 1),
-            (float)Math.PI*0f,
-            (float)Math.PI*0.25f,
+            (float)Math.PI*0.1f,
+            (float)Math.PI*1f,
             1
         );
 
         box2 = new RigidBody(
             new Vector2(0, -0.5f),
             Vector2.Zero.cpy(),
-            new BoxShape(10, 1),
+            new BoxShape(1, 1),
             (float)Math.PI*0f,
-            (float)Math.PI*-0.01f,
+            (float)Math.PI*0f,
             1
         );
     }
 
     @Override
     public void render() {
-        float deltaT = Gdx.graphics.getDeltaTime();
-        box1.physics_tick(deltaT);
-        box2.physics_tick(deltaT);
+        float deltaT = Gdx.graphics.getDeltaTime() / 5;
+        if (Gdx.input.isKeyPressed(Input.Keys.T)) {
+            box1.physics_tick(deltaT);
+            box2.physics_tick(deltaT);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.Y)) {
+            box1.physics_tick(-deltaT);
+            box2.physics_tick(-deltaT);
+        }
 
         camera_input();
 
@@ -67,9 +72,8 @@ public class Main extends ApplicationAdapter {
         Polygon p2 = box2.get_polygon();
 
         sr.setColor(Color.WHITE);
-        CollisionManifold cm = PhysicsManager.SAT_overlap(p1, p2);
+        CollisionManifold cm = PhysicsManager.SAT_overlap(p2, p1);
         if (cm.minimum_penetration_depth > 0) {
-            System.out.println(cm.contact_points.length);
             sr.setColor(Color.RED);
             for (Vector2 cv: cm.contact_points) sr.polygon(new float[]{
                 cv.x + 0.025f, cv.y + 0.025f,
@@ -77,8 +81,8 @@ public class Main extends ApplicationAdapter {
                 cv.x - 0.025f, cv.y - 0.025f,
                 cv.x - 0.025f, cv.y + 0.025f
             });
-            sr.setColor(Color.GREEN);
-            box1.position.mulAdd(cm.collision_normal, -cm.minimum_penetration_depth);
+            sr.setColor(new Color().fromHsv(217, 0.67f, 0.97f));
+//            box1.position.mulAdd(cm.collision_normal, cm.minimum_penetration_depth);
         }
 
         sr.polygon(box1.get_polygon().get_float_array());

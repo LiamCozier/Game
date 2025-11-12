@@ -98,6 +98,7 @@ public class PhysicsManager {
 
         Vector2 c1 = centroid(p1);
         Vector2 c2 = centroid(p2);
+        assert collision_normal != null;
         if (collision_normal.dot(c2.cpy().sub(c1)) < 0) {
             collision_normal.scl(-1);
         }
@@ -115,20 +116,22 @@ public class PhysicsManager {
         ClippingFeatures cf1 = get_features(p1, collision_normal);
         ClippingFeatures cf2 = get_features(p2, collision_normal.cpy().scl(-1));
 
-        float alignment1 = Math.abs(collision_normal.dot(cf1.edge_direction.cpy().nor()));
         float alignment2 = Math.abs(collision_normal.dot(cf2.edge_direction.cpy().nor()));
+        float alignment1 = Math.abs(collision_normal.dot(cf1.edge_direction.cpy().nor()));
 
         if (alignment1 <= alignment2) {
             reference = p1;
             cf_ref = cf1;
             incident = p2;
             cf_inc = cf2;
+            System.out.println("ref: p1 inc: p2");
         } else {
             reference = p2;
             cf_ref = cf2;
             incident = p1;
             cf_inc = cf1;
             flip = true;
+            System.out.println("ref: p2 inc: p1");
         }
 
         Vector2 v1 = reference.vertices()[cf_ref.edge_start_index];
@@ -140,20 +143,19 @@ public class PhysicsManager {
 
         if (ref_normal.dot(collision_normal) <= 0) ref_normal.scl(-1);
 
-        Vector2 side_normal = new Vector2(-ref_normal.y, ref_normal.x);
 
-        Vector2 left_normal  = side_normal;
-        Vector2 right_normal = side_normal.cpy().scl(-1);
+        Vector2 left_normal  = edge_dir;
+        Vector2 right_normal = edge_dir.cpy().scl(-1);
 
         float left_offset  = left_normal.dot(v1);
         float right_offset = right_normal.dot(v2);
 
 
-        Vector2 iv1 = incident.vertices()[cf_inc.edge_start_index];
-        Vector2 iv2 = incident.vertices()[cf_inc.edge_end_index];
+        Vector2 inc_vertex1 = incident.vertices()[cf_inc.edge_start_index];
+        Vector2 inc_vertex2 = incident.vertices()[cf_inc.edge_end_index];
 
 
-        Vector2[] clipped = clip(iv1, iv2, left_normal, left_offset);
+        Vector2[] clipped = clip(inc_vertex1, inc_vertex2, left_normal, left_offset);
         if (clipped.length == 0) return new Vector2[0];
 
         Vector2 a = clipped[0];
@@ -164,9 +166,10 @@ public class PhysicsManager {
         a = clipped[0];
         b = clipped.length > 1 ? clipped[1] : clipped[0];
         Vector2 ref_plane_normal = ref_normal.cpy().scl(-1);
+        if (flip) ref_plane_normal.scl(-1);
         float ref_plane_offset = -ref_normal.dot(v1);
         clipped = clip(a, b, ref_plane_normal, ref_plane_offset);
-        if (clipped.length == 0) return new Vector2[0];
+//        if (clipped.length == 0) return new Vector2[0];
 
 
         List<Vector2> contacts = new ArrayList<>();
@@ -174,7 +177,7 @@ public class PhysicsManager {
 
         for (Vector2 p : clipped) {
             float separation = ref_normal.dot(p) - ref_offset;
-            if (separation <= pen_depth + 1e-6f) {
+            if (separation <= pen_depth + 0) {
                 contacts.add(p.cpy());
             }
         }
@@ -184,7 +187,7 @@ public class PhysicsManager {
     }
 
     public static Vector2[] clip(Vector2 v1, Vector2 v2, Vector2 plane_normal, float plane_offset) {
-        final float EPS = 1e-8f;
+        final float EPS = 0;
         List<Vector2> contact_points = new ArrayList<>(2);
 
         float d1 = v1.dot(plane_normal) - plane_offset;
@@ -193,7 +196,7 @@ public class PhysicsManager {
         if (d1 >= -EPS) contact_points.add(v1.cpy());
         if (d2 >= -EPS) contact_points.add(v2.cpy());
 
-        if (d1 * d2 < -EPS) { // segment crosses the plane
+        if (d1 * d2 < 0) { // segment crosses the plane
             float t = d1 / (d1 - d2);
             contact_points.add(v1.cpy().mulAdd(v2.cpy().sub(v1), t));
         }
