@@ -1,268 +1,482 @@
 package io.github.neaproject.physics;
 
 import com.badlogic.gdx.math.Vector2;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class PhysicsManager {
 
-    private static boolean AABB_overlap(BoundingBox b1, BoundingBox b2) {
 
-        // Apply previously mentioned conditions
-        return  b1.min.x < b2.max.x &&
+    private static boolean aabb_overlap(BoundingBox b1, BoundingBox b2) {
+        return b1.min.x < b2.max.x &&
             b1.max.x > b2.min.x &&
             b1.min.y < b2.max.y &&
             b1.max.y > b2.min.y;
     }
 
     private static Vector2[] get_polygon_edges(Polygon p) {
+        Vector2[] verts = p.vertices();
+        int count = verts.length;
+        Vector2[] edges = new Vector2[count];
 
-        Vector2[] vertices = p.vertices();
-        int edge_count = vertices.length;
-        Vector2[] edges = new Vector2[edge_count];
-
-        for (int i=0; i<edge_count; i++) {
-            edges[i] = vertices[(i+1)%edge_count].cpy().sub(vertices[i]);
+        for (int i = 0; i < count; i++) {
+            edges[i] = verts[(i + 1) % count].cpy().sub(verts[i]);
         }
-
         return edges;
     }
 
-    public static Vector2[] get_polygon_normals(Polygon... polygons) {
+    private static Vector2[] get_polygon_normals(Polygon... polys) {
+        int total_edges = 0;
+        for (Polygon p : polys) total_edges += p.vertices().length;
 
-        int edge_count = 0;
-        for (Polygon p:polygons) {
-            edge_count += p.vertices().length;
-        }
+        Vector2[] normals = new Vector2[total_edges];
+        int idx = 0;
 
-        Vector2[] normals = new Vector2[edge_count];
-        int i = 0;
-        for (Polygon p:polygons) {
-            Vector2[] edges = get_polygon_edges(p);
-
-            for (int j = 0; j < edges.length; j++) {
-                normals[i] = new Vector2(-edges[j].y, edges[j].x);
-                normals[i].nor();
-                i++;
+        for (Polygon p : polys) {
+            for (Vector2 e : get_polygon_edges(p)) {
+                // CCW outward normal = (-ey, ex)
+                normals[idx++] = new Vector2(-e.y, e.x).nor();
             }
         }
-
         return normals;
     }
 
-    public static float[] project_polygon_onto_axis(Polygon p, Vector2 axis) {
-        Vector2[] vertices = p.vertices();
-        float min_projection = Float.MAX_VALUE;
-        float max_projection = -Float.MAX_VALUE;
-
-        for (int i=0; i<vertices.length; i++) {
-            float projection = axis.dot(vertices[i]);
-            if (projection < min_projection) min_projection = projection;
-            if (projection > max_projection) max_projection = projection;
+    private static float[] project_polygon(Polygon p, Vector2 axis) {
+        float min = Float.MAX_VALUE;
+        float max = -Float.MAX_VALUE;
+        for (Vector2 v : p.vertices()) {
+            float d = axis.dot(v);
+            if (d < min) min = d;
+            if (d > max) max = d;
         }
-
-        return new float[]{min_projection, max_projection};
+        return new float[]{min, max};
     }
 
-    private static float get_range_overlap(float[] r1, float[] r2) {
-        float overlap = Math.min(r1[1], r2[1]) - Math.max(r1[0], r2[0]);
-        // return 0 if the overlap value is negative (no overlap)
-        return Math.max(overlap, 0f);
+    private static float get_overlap(float[] r1, float[] r2) {
+        float d = Math.min(r1[1], r2[1]) - Math.max(r1[0], r2[0]);
+        return Math.max(d, 0f);
     }
 
-    private static Vector2 centroid(Polygon p) {
-        Vector2[] vertices = p.vertices();
-        Vector2 c = new Vector2();
-        for (Vector2 vertex : vertices) c.add(vertex);
-        return c.scl(1f / vertices.length);
+    private static Vector2 get_centroid(Polygon p) {
+        Vector2 sum = new Vector2();
+        for (Vector2 v : p.vertices()) sum.add(v);
+        return sum.scl(1f / p.vertices().length);
     }
 
-    public static CollisionManifold SAT_overlap(Polygon p1, Polygon p2) {
-        float min_penetration = Float.MAX_VALUE;
-        Vector2 collision_normal = null;
+    public static CollisionManifold sat_overlap(Polygon p1, Polygon p2) {
+        final float EPS = 1e-6f;
+
+        float min_overlap = Float.MAX_VALUE;
+        Vector2 best_axis = null;
 
         Vector2[] axes = get_polygon_normals(p1, p2);
-        for (Vector2 axis: axes) {
-            float[] range1 = project_polygon_onto_axis(p1, axis);
-            float[] range2 = project_polygon_onto_axis(p2, axis);
+        for (Vector2 axis : axes) {
+            float[] r1 = project_polygon(p1, axis);
+            float[] r2 = project_polygon(p2, axis);
 
-            float overlap = get_range_overlap(range1, range2);
-            if (overlap < 1e-6f) {
-                return new CollisionManifold(0, new Vector2(0, 0), new Vector2[0]);
-            } else if (overlap < min_penetration) {
-                min_penetration = overlap;
-                collision_normal = axis.cpy();
+            float overlap = get_overlap(r1, r2);
+            if (overlap < EPS)
+                return new CollisionManifold(0, new Vector2(), new Vector2[0]);
+
+            if (overlap < min_overlap) {
+                min_overlap = overlap;
+                best_axis = axis.cpy();
             }
         }
 
-        Vector2 c1 = centroid(p1);
-        Vector2 c2 = centroid(p2);
-        assert collision_normal != null;
-        if (collision_normal.dot(c2.cpy().sub(c1)) < 0) {
-            collision_normal.scl(-1);
-        }
+        Vector2 c1 = get_centroid(p1);
+        Vector2 c2 = get_centroid(p2);
+        Vector2 dir = c2.sub(c1);
+        if (best_axis.dot(dir) < 0)
+            best_axis.scl(-1f);
 
-        Vector2[] contact_points = calc_contact_points(p1, p2, collision_normal, min_penetration);
+        Vector2[] contact_points = calc_contact_points(p1, p2, best_axis, min_overlap);
 
-        return new CollisionManifold(min_penetration, collision_normal, contact_points);
+        return new CollisionManifold(min_overlap, best_axis, contact_points);
     }
 
-    public static Vector2[] calc_contact_points(Polygon p1, Polygon p2, Vector2 collision_normal, float pen_depth) {
-        Polygon reference, incident;
+    private static Vector2[] calc_contact_points(Polygon p1, Polygon p2, Vector2 normal, float pen_depth) {
+        final float EPS_CLIP = 1e-4f;
+
+        ClippingFeatures cf1 = get_features(p1, normal);
+        ClippingFeatures cf2 = get_features(p2, normal.cpy().scl(-1f));
+
+        float align1 = cf1.edge_normal.dot(normal);
+        float align2 = cf2.edge_normal.dot(normal);
+
+        Polygon ref_poly, inc_poly;
         ClippingFeatures cf_ref, cf_inc;
-        boolean flip = false;
 
-        ClippingFeatures cf1 = get_features(p1, collision_normal);
-        ClippingFeatures cf2 = get_features(p2, collision_normal.cpy().scl(-1));
-
-        float alignment2 = Math.abs(collision_normal.dot(cf2.edge_direction.cpy().nor()));
-        float alignment1 = Math.abs(collision_normal.dot(cf1.edge_direction.cpy().nor()));
-
-        if (alignment1 <= alignment2) {
-            reference = p1;
+        if (align1 >= align2) {
+            ref_poly = p1;
             cf_ref = cf1;
-            incident = p2;
+            inc_poly = p2;
             cf_inc = cf2;
         } else {
-            reference = p2;
+            ref_poly = p2;
             cf_ref = cf2;
-            incident = p1;
+            inc_poly = p1;
             cf_inc = cf1;
-            flip = true;
         }
 
-        Vector2 v1 = reference.vertices()[cf_ref.edge_start_index];
-        Vector2 v2 = reference.vertices()[cf_ref.edge_end_index];
+        Vector2[] ref_verts = ref_poly.vertices();
+        Vector2 v1 = ref_verts[cf_ref.edge_start_index];
+        Vector2 v2 = ref_verts[cf_ref.edge_end_index];
+
         Vector2 edge = v2.cpy().sub(v1);
-        Vector2 ref_normal = new Vector2(edge.y, -edge.x).nor();
+        Vector2 ref_normal = cf_ref.edge_normal.cpy();
+        if (ref_normal.dot(normal) < 0) ref_normal.scl(-1f);
 
         Vector2 edge_dir = edge.cpy().nor();
 
-        if (ref_normal.dot(collision_normal) <= 0) ref_normal.scl(-1);
+        Vector2 left_normal = edge_dir;
+        Vector2 right_normal = edge_dir.cpy().scl(-1f);
 
-
-        Vector2 left_normal  = edge_dir;
-        Vector2 right_normal = edge_dir.cpy().scl(-1);
-
-        float left_offset  = left_normal.dot(v1);
+        float left_offset = left_normal.dot(v1);
         float right_offset = right_normal.dot(v2);
 
+        Vector2[] inc_verts = inc_poly.vertices();
+        float best = Float.MAX_VALUE;
+        int inc_start_index = 0, inc_end_index = 1;
 
-        Vector2 inc_vertex1 = incident.vertices()[cf_inc.edge_start_index];
-        Vector2 inc_vertex2 = incident.vertices()[cf_inc.edge_end_index];
+        for (int i = 0; i < inc_verts.length; i++) {
+            int j = (i + 1) % inc_verts.length;
+            Vector2 e = inc_verts[j].cpy().sub(inc_verts[i]).nor();
+            Vector2 face_normal = new Vector2(-e.y, e.x).nor(); // CCW outward
+            float d = face_normal.dot(ref_normal);              // want most anti-parallel
+            if (d < best) {
+                best = d;
+                inc_start_index = i;
+                inc_end_index = j;
+            }
+        }
 
+        Vector2 inc_v1 = inc_verts[inc_start_index];
+        Vector2 inc_v2 = inc_verts[inc_end_index];
 
-        Vector2[] clipped = clip(inc_vertex1, inc_vertex2, left_normal, left_offset);
-        if (clipped.length == 0) return new Vector2[0];
+        Vector2[] clipped = clip_segment(inc_v1, inc_v2, left_normal, left_offset);
+        if (clipped.length == 0)
+            return fallback_contact(v1, ref_normal, inc_v1, inc_v2);
 
         Vector2 a = clipped[0];
-        Vector2 b = clipped.length > 1 ? clipped[1] : clipped[0];
-        clipped = clip(a, b, right_normal, right_offset);
-        if (clipped.length == 0) return new Vector2[0];
+        Vector2 b = (clipped.length > 1 ? clipped[1] : clipped[0]);
+
+        clipped = clip_segment(a, b, right_normal, right_offset);
+        if (clipped.length == 0)
+            return fallback_contact(v1, ref_normal, inc_v1, inc_v2);
 
         a = clipped[0];
-        b = clipped.length > 1 ? clipped[1] : clipped[0];
-        Vector2 ref_plane_normal = ref_normal.cpy().scl(-1);
-        if (flip) ref_plane_normal.scl(-1);
-        float ref_plane_offset = -ref_normal.dot(v1);
-        clipped = clip(a, b, ref_plane_normal, ref_plane_offset);
-//        if (clipped.length == 0) return new Vector2[0];
+        b = (clipped.length > 1 ? clipped[1] : clipped[0]);
 
+        Vector2 final_plane_normal = ref_normal.cpy().scl(-1f);
+        float final_plane_offset = -ref_normal.dot(v1) - EPS_CLIP;
+        clipped = clip_segment(a, b, final_plane_normal, final_plane_offset);
+
+        if (clipped.length == 0)
+            return fallback_contact(v1, ref_normal, inc_v1, inc_v2);
 
         List<Vector2> contacts = new ArrayList<>();
         float ref_offset = ref_normal.dot(v1);
+        float allowed = pen_depth + 2f * EPS_CLIP;
 
         for (Vector2 p : clipped) {
             float separation = ref_normal.dot(p) - ref_offset;
-            if (separation <= pen_depth + 1e-4f) {
-                contacts.add(p.cpy());
-            }
+            if (separation <= allowed) contacts.add(p.cpy());
         }
 
-        // merge arbitrarily close contact points
-        if (contacts.size() == 2) {
-            float separationAlongRef = contacts.get(0).cpy().sub(contacts.get(1)).dot(edge_dir);
-            if (Math.abs(separationAlongRef) < 1e-1f) {
-                Vector2 merged = contacts.get(0).cpy().add(contacts.get(1)).scl(0.5f);
-                contacts.clear();
-                contacts.add(merged);
-            }
-        }
-
-
+        if (contacts.isEmpty())
+            return fallback_contact(v1, ref_normal, inc_v1, inc_v2);
 
         return contacts.toArray(new Vector2[0]);
     }
 
-    public static Vector2[] clip(Vector2 v1, Vector2 v2, Vector2 plane_normal, float plane_offset) {
-        final float EPS = 0;
-        List<Vector2> contact_points = new ArrayList<>(2);
+    private static ClippingFeatures get_features(Polygon polygon, Vector2 collision_normal) {
+        Vector2[] vertices = polygon.vertices();
+        int vertex_count = vertices.length;
 
-        float d1 = v1.dot(plane_normal) - plane_offset;
-        float d2 = v2.dot(plane_normal) - plane_offset;
+        // 1. Find support vertex (furthest along collision_normal)
+        int support_index = 0;
+        float max_projection = -Float.MAX_VALUE;
 
-        if (d1 >= -EPS) contact_points.add(v1.cpy());
-        if (d2 >= -EPS) contact_points.add(v2.cpy());
-
-        if (d1 * d2 < 0) { // segment crosses the plane
-            float t = d1 / (d1 - d2);
-            contact_points.add(v1.cpy().mulAdd(v2.cpy().sub(v1), t));
-        }
-
-        return contact_points.toArray(new Vector2[0]);
-    }
-
-    public static ClippingFeatures get_features(Polygon p, Vector2 collision_normal) {
-        ClippingFeatures cf = new ClippingFeatures();
-        Vector2[] vertices = p.vertices();
-
-        Vector2 support_vertex = null;
-        float support_distance = -Float.MAX_VALUE;
-        int support_index = -1;
-
-        // calculate maximum distance vertex along the collision normal
-        for (int i=0; i<vertices.length; i++) {
-            float dot = vertices[i].dot(collision_normal);
-            if (dot > support_distance) {
-                support_vertex = vertices[i].cpy();
-                support_distance = dot;
+        for (int i = 0; i < vertex_count; i++) {
+            float projection = collision_normal.dot(vertices[i]);
+            if (projection > max_projection) {
+                max_projection = projection;
                 support_index = i;
             }
         }
 
-        // calculate the most perpendicular edge to the collision normal
-        int edge_count = vertices.length;
-        assert support_vertex != null;
-        Vector2 prev_edge_direction = support_vertex.cpy().sub(vertices[(support_index-1+edge_count)%edge_count]);
-        Vector2 next_edge_direction = vertices[(support_index+1)%edge_count].cpy().sub(support_vertex);
+        Vector2 support_vertex = vertices[support_index];
 
+        // 2. Look at the two edges touching the support vertex
+        int prev_index = (support_index - 1 + vertex_count) % vertex_count;
+        int next_index = (support_index + 1) % vertex_count;
+
+        // edge from prev -> support
+        Vector2 prev_edge = support_vertex.cpy().sub(vertices[prev_index]);
+        // edge from support -> next
+        Vector2 next_edge = vertices[next_index].cpy().sub(support_vertex);
+
+        // Your normal convention: CCW edge → (-ey, ex)
+        Vector2 prev_normal = new Vector2(-prev_edge.y, prev_edge.x);
+        Vector2 next_normal = new Vector2(-next_edge.y, next_edge.x);
+
+        if (prev_normal.len2() != 0f) prev_normal.nor();
+        if (next_normal.len2() != 0f) next_normal.nor();
+
+        float prev_dot = prev_normal.dot(collision_normal);
+        float next_dot = next_normal.dot(collision_normal);
+
+        int edge_start_index;
+        int edge_end_index;
         Vector2 edge_direction;
-        int edge_start_index, edge_end_index;
+        Vector2 edge_normal;
 
-        Vector2 prev_face_normal = new Vector2(-prev_edge_direction.y, prev_edge_direction.x).nor();
-        Vector2 next_face_normal = new Vector2(-next_edge_direction.y, next_edge_direction.x).nor();
-
-        float prev_dot = prev_face_normal.dot(collision_normal);
-        float next_dot = next_face_normal.dot(collision_normal);
-
+        // Choose the edge whose normal is more aligned with collision_normal
         if (prev_dot > next_dot) {
-            edge_direction = prev_edge_direction.cpy().nor();
-            edge_start_index = (support_index - 1 + edge_count) % edge_count;
-            edge_end_index   = support_index;
+            edge_start_index = prev_index;
+            edge_end_index = support_index;
+            edge_direction = support_vertex.cpy().sub(vertices[prev_index]); // prev -> support
+            edge_normal = prev_normal;
         } else {
-            edge_direction = next_edge_direction.cpy().nor();
             edge_start_index = support_index;
-            edge_end_index   = (support_index + 1) % edge_count;
+            edge_end_index = next_index;
+            edge_direction = vertices[next_index].cpy().sub(support_vertex); // support -> next
+            edge_normal = next_normal;
         }
 
-        cf.edge_start_index = edge_start_index;
-        cf.edge_end_index = edge_end_index;
-        cf.support_vertex = support_vertex;
-        cf.edge_direction = edge_direction;
-        cf.support_index = support_index;
-        return cf;
+        if (edge_direction.len2() != 0f) edge_direction.nor();
+        if (edge_normal.len2() != 0f) edge_normal.nor();
 
+        ClippingFeatures features = new ClippingFeatures();
+        features.support_vertex = support_vertex.cpy();
+        features.support_index = support_index;
+        features.edge_start_index = edge_start_index;
+        features.edge_end_index = edge_end_index;
+        features.edge_direction = edge_direction;
+        features.edge_normal = edge_normal;
+
+        return features;
     }
+
+
+    private static Vector2[] clip_segment(Vector2 a, Vector2 b, Vector2 plane_normal, float plane_offset) {
+        final float EPS = 1e-4f;
+        List<Vector2> out = new ArrayList<>(2);
+
+        float da = a.dot(plane_normal) - plane_offset;
+        float db = b.dot(plane_normal) - plane_offset;
+
+        if (da >= -EPS) out.add(a.cpy());
+        if (db >= -EPS) out.add(b.cpy());
+
+        if (da * db < 0) {
+            float t = da / (da - db);
+            out.add(a.cpy().mulAdd(b.cpy().sub(a), t));
+        }
+
+        return out.toArray(new Vector2[0]);
+    }
+
+    private static Vector2[] fallback_contact(Vector2 face_point, Vector2 face_normal, Vector2 inc_a, Vector2 inc_b) {
+        float ref_dot = face_normal.dot(face_point);
+        float da = face_normal.dot(inc_a) - ref_dot;
+        float db = face_normal.dot(inc_b) - ref_dot;
+
+        Vector2 sp = (da > db ? inc_a : inc_b).cpy();
+        float lambda = face_normal.dot(sp) - ref_dot;
+        sp.sub(face_normal.cpy().scl(lambda));
+        return new Vector2[]{sp};
+    }
+
+    public static void resolve_collision(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
+        // sanity checks
+        if (manifold == null ||
+            manifold.collision_normal == null ||
+            manifold.contact_points == null ||
+            manifold.contact_points.length == 0) {
+            return;
+        }
+
+        // if both bodies are static, do nothing
+        if (body_a.inv_mass + body_b.inv_mass == 0f) {
+            return;
+        }
+
+        Vector2 normal = manifold.collision_normal.cpy().nor();
+        int contact_count = manifold.contact_points.length;
+
+        // combine material properties
+        float restitution = Math.min(body_a.restitution, body_b.restitution);
+
+        float static_friction = (float) Math.sqrt(
+            body_a.static_friction * body_a.static_friction +
+                body_b.static_friction * body_b.static_friction
+        );
+        float dynamic_friction = (float) Math.sqrt(
+            body_a.dynamic_friction * body_a.dynamic_friction +
+                body_b.dynamic_friction * body_b.dynamic_friction
+        );
+
+        // make sure impulse arrays exist and match contact count
+        if (manifold.normal_impulses == null || manifold.normal_impulses.length != contact_count) {
+            manifold.normal_impulses = new float[contact_count];
+            manifold.tangent_impulses = new float[contact_count];
+        }
+
+        // --- velocity / angular resolution ---
+        for (int i = 0; i < contact_count; i++) {
+            Vector2 contact_point = manifold.contact_points[i];
+
+            // r from centres of mass to contact point
+            Vector2 ra = contact_point.cpy().sub(body_a.position);
+            Vector2 rb = contact_point.cpy().sub(body_b.position);
+
+            // linear + angular velocity at contact points
+            Vector2 velocity_a_at_contact = body_a.velocity.cpy().add(new Vector2(
+                -body_a.angular_velocity * ra.y,
+                body_a.angular_velocity * ra.x
+            ));
+
+            Vector2 velocity_b_at_contact = body_b.velocity.cpy().add(new Vector2(
+                -body_b.angular_velocity * rb.y,
+                body_b.angular_velocity * rb.x
+            ));
+
+            Vector2 relative_velocity = velocity_b_at_contact.cpy().sub(velocity_a_at_contact);
+
+            // relative velocity along normal
+            float contact_velocity_normal = relative_velocity.dot(normal);
+            // if separating along normal, no impulse
+            if (contact_velocity_normal > 0f) {
+                manifold.normal_impulses[i] = 0f;
+                manifold.tangent_impulses[i] = 0f;
+                continue;
+            }
+
+            float ra_cross_n = ra.x * normal.y - ra.y * normal.x;
+            float rb_cross_n = rb.x * normal.y - rb.y * normal.x;
+
+            float inv_mass_sum =
+                body_a.inv_mass + body_b.inv_mass +
+                    (ra_cross_n * ra_cross_n) * body_a.inv_inertia +
+                    (rb_cross_n * rb_cross_n) * body_b.inv_inertia;
+
+            if (inv_mass_sum == 0f) {
+                manifold.normal_impulses[i] = 0f;
+                manifold.tangent_impulses[i] = 0f;
+                continue;
+            }
+
+            // --- normal impulse ---
+            float normal_impulse_scalar = -(1f + restitution) * contact_velocity_normal;
+            normal_impulse_scalar /= inv_mass_sum;
+            normal_impulse_scalar /= contact_count; // split across contacts
+
+            Vector2 normal_impulse = normal.cpy().scl(normal_impulse_scalar);
+
+            // apply normal impulse to linear velocity
+            body_a.velocity.sub(normal_impulse.cpy().scl(body_a.inv_mass));
+            body_b.velocity.add(normal_impulse.cpy().scl(body_b.inv_mass));
+
+            // apply normal impulse to angular velocity (torque = r x J)
+            float ra_cross_jn = ra.x * normal_impulse.y - ra.y * normal_impulse.x;
+            float rb_cross_jn = rb.x * normal_impulse.y - rb.y * normal_impulse.x;
+
+            body_a.angular_velocity -= ra_cross_jn * body_a.inv_inertia;
+            body_b.angular_velocity += rb_cross_jn * body_b.inv_inertia;
+
+            manifold.normal_impulses[i] = normal_impulse_scalar;
+
+            // --- friction impulse ---
+            // recompute velocities at contact after normal impulse
+            velocity_a_at_contact = body_a.velocity.cpy().add(new Vector2(
+                -body_a.angular_velocity * ra.y,
+                body_a.angular_velocity * ra.x
+            ));
+
+            velocity_b_at_contact = body_b.velocity.cpy().add(new Vector2(
+                -body_b.angular_velocity * rb.y,
+                body_b.angular_velocity * rb.x
+            ));
+
+            relative_velocity = velocity_b_at_contact.cpy().sub(velocity_a_at_contact);
+
+            // build tangent
+            Vector2 tangent = relative_velocity.cpy().sub(
+                normal.cpy().scl(relative_velocity.dot(normal))
+            );
+            if (tangent.len2() > 0f) {
+                tangent.nor();
+            } else {
+                manifold.tangent_impulses[i] = 0f;
+                continue;
+            }
+
+            float contact_velocity_tangent = relative_velocity.dot(tangent);
+
+            float ra_cross_t = ra.x * tangent.y - ra.y * tangent.x;
+            float rb_cross_t = rb.x * tangent.y - rb.y * tangent.x;
+
+            float inv_mass_sum_tangent =
+                body_a.inv_mass + body_b.inv_mass +
+                    (ra_cross_t * ra_cross_t) * body_a.inv_inertia +
+                    (rb_cross_t * rb_cross_t) * body_b.inv_inertia;
+
+            if (inv_mass_sum_tangent == 0f) {
+                manifold.tangent_impulses[i] = 0f;
+                continue;
+            }
+
+            float tangent_impulse_scalar = -contact_velocity_tangent;
+            tangent_impulse_scalar /= inv_mass_sum_tangent;
+            tangent_impulse_scalar /= contact_count;
+
+            float abs_tangent_impulse_scalar = Math.abs(tangent_impulse_scalar);
+            float max_static_friction_impulse = normal_impulse_scalar * static_friction;
+
+            // Coulomb friction: clamp or fall back to dynamic
+            if (abs_tangent_impulse_scalar > max_static_friction_impulse) {
+                tangent_impulse_scalar = -normal_impulse_scalar * dynamic_friction * Math.signum(tangent_impulse_scalar);
+            }
+
+            Vector2 friction_impulse = tangent.cpy().scl(tangent_impulse_scalar);
+
+            // apply friction impulse to linear velocity
+            body_a.velocity.sub(friction_impulse.cpy().scl(body_a.inv_mass));
+            body_b.velocity.add(friction_impulse.cpy().scl(body_b.inv_mass));
+
+            // apply friction impulse to angular velocity
+            float ra_cross_jt = ra.x * friction_impulse.y - ra.y * friction_impulse.x;
+            float rb_cross_jt = rb.x * friction_impulse.y - rb.y * friction_impulse.x;
+
+            body_a.angular_velocity -= ra_cross_jt * body_a.inv_inertia;
+            body_b.angular_velocity += rb_cross_jt * body_b.inv_inertia;
+
+            manifold.tangent_impulses[i] = tangent_impulse_scalar;
+        }
+
+        // --- positional correction (to prevent sinking) ---
+        final float penetration_slop = 0.01f;   // ignore tiny penetrations
+        final float correction_percent = 0.8f;  // how aggressive the correction is
+
+        float inv_mass_sum_bodies = body_a.inv_mass + body_b.inv_mass;
+        if (inv_mass_sum_bodies > 0f) {
+            float penetration_depth = Math.max(
+                manifold.minimum_penetration_depth - penetration_slop,
+                0f
+            );
+
+            if (penetration_depth > 0f) {
+                Vector2 correction = normal.scl(
+                    penetration_depth * correction_percent / inv_mass_sum_bodies
+                );
+
+                body_a.position.sub(correction.cpy().scl(body_a.inv_mass));
+                body_b.position.add(correction.cpy().scl(body_b.inv_mass));
+            }
+        }
+    }
+
 
 }

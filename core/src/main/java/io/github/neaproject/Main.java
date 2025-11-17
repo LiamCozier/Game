@@ -25,7 +25,7 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
 
-        float height = 5;
+        float height = 20;
         float ppu = Gdx.graphics.getHeight() / height;
         float width = Gdx.graphics.getWidth() / ppu;
         camera = new OrthographicCamera(width, height);
@@ -33,69 +33,96 @@ public class Main extends ApplicationAdapter {
         sr = new ShapeRenderer();
 
         box1 = new RigidBody(
-            new Vector2(-0f, 0.8f),
-            new Vector2(0f, -0.5f),
+            new Vector2(-5f, -5f),
+            new Vector2(15f, 25f),
             new BoxShape(1, 1),
             (float)Math.PI*0f,
-            (float)Math.PI*0.05f,
-            1
+            (float)Math.PI*0f,
+            1,
+            true
         );
 
         box2 = new RigidBody(
-            new Vector2(0, -0.5f),
-            Vector2.Zero.cpy(),
-            new BoxShape(10, 1),
+            new Vector2(0f, -5f),
+            new Vector2(0f, 0f),
+            new BoxShape(50, 6),
             (float)Math.PI*0f,
             (float)Math.PI*0f,
-            1
+            100,
+            false
         );
     }
 
+
+
     @Override
     public void render() {
+
+
         float deltaT = Gdx.graphics.getDeltaTime();
-        if (Gdx.input.isKeyPressed(Input.Keys.T)) {
-            box1.physics_tick(deltaT);
-            box2.physics_tick(deltaT);
-        } else if (Gdx.input.isKeyPressed(Input.Keys.Y)) {
-            box1.physics_tick(-deltaT);
-            box2.physics_tick(-deltaT);
-        }
+        box1.physics_tick(deltaT);
+        box2.physics_tick(deltaT);
 
         camera_input();
 
         ScreenUtils.clear(0.18f, 0.24f, 0.29f, 1);
         sr.begin(ShapeRenderer.ShapeType.Line);
+        sr.polygon(box1.get_polygon().get_float_array());
+        sr.polygon(box2.get_polygon().get_float_array());
         sr.setProjectionMatrix(camera.combined);
 
         Polygon p1 = box1.get_polygon();
         Polygon p2 = box2.get_polygon();
 
         sr.setColor(Color.WHITE);
-        CollisionManifold cm = PhysicsManager.SAT_overlap(p1, p2);
-        if (cm.minimum_penetration_depth > 0) {
-            System.out.println(cm.contact_points.length);
-            sr.setColor(Color.RED);
-            for (Vector2 cv: cm.contact_points) {
-                sr.polygon(new float[]{
-                    cv.x + 0.025f, cv.y + 0.025f,
-                    cv.x + 0.025f, cv.y - 0.025f,
-                    cv.x - 0.025f, cv.y - 0.025f,
-                    cv.x - 0.025f, cv.y + 0.025f
-            });
+        if (true) {
+            System.out.println("===== PHYS DEBUG FRAME =====");
+
+            debugBody("Box1", box1);
+            debugBody("Box2", box2);
+
+            CollisionManifold cm = PhysicsManager.sat_overlap(box1.get_polygon(), box2.get_polygon());
+            if (cm.minimum_penetration_depth > 0) {
+                debugContact(cm);
             }
-            sr.setColor(new Color().fromHsv(217, 0.67f, 0.97f));
-            box1.position.mulAdd(cm.collision_normal, -cm.minimum_penetration_depth);
+
+            System.out.println();
+        }
+        for (int i=0; i<5; i++) {
+            CollisionManifold cm = PhysicsManager.sat_overlap(p1, p2);
+            PhysicsManager.resolve_collision(box1, box2, cm);
         }
 
         sr.polygon(box1.get_polygon().get_float_array());
         sr.polygon(box2.get_polygon().get_float_array());
-
         sr.end();
-
-
-
     }
+
+    private void debugBody(String label, RigidBody body) {
+        System.out.printf(
+            "%s | Pos(%.3f, %.3f)  Vel(%.3f, %.3f)  Angle=%.3f  AngVel=%.3f%n",
+            label,
+            body.position.x, body.position.y,
+            body.velocity.x, body.velocity.y,
+            body.orientation, body.angular_velocity
+        );
+    }
+
+    private void debugContact(CollisionManifold cm) {
+        System.out.printf(
+            "    Contact: depth=%.5f  normal(%.3f, %.3f)  points=%d%n",
+            cm.minimum_penetration_depth,
+            cm.collision_normal.x, cm.collision_normal.y,
+            cm.contact_points.length
+        );
+
+        for (int i = 0; i < cm.contact_points.length; i++) {
+            Vector2 p = cm.contact_points[i];
+            System.out.printf("        P%d (%.3f, %.3f)%n", i, p.x, p.y);
+        }
+    }
+
+
 
     public void camera_input() {
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {

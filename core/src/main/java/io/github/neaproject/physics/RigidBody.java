@@ -4,31 +4,37 @@ import com.badlogic.gdx.math.Vector2;
 import io.github.neaproject.physics.shape.Shape;
 
 public class RigidBody extends Particle {
-
     private Shape shape;
+    public float orientation;
+    public float angular_velocity;
+    public final float mass;
+    public final float inv_mass;
+    public final float inertia;
+    public final float inv_inertia;
+    public final float restitution;
+    public final float static_friction;
+    public final float dynamic_friction;
 
-    private float orientation;
-    private float angular_velocity;
-    private final float mass;
-    private final float inv_mass;
-    private final float moment_of_inertia;
-    private final float inv_moment_of_inertia;
-
-    public RigidBody(Vector2 position, Vector2 velocity, Shape shape, float orientation, float angular_velocity, float mass) {
-        super(position, velocity);
+    public RigidBody(Vector2 position, Vector2 velocity, Shape shape, float orientation, float angular_velocity, float mass, boolean has_gravity) {
+        super(position, velocity, has_gravity);
 
         this.shape = shape;
         this.orientation = orientation;
         this.angular_velocity = angular_velocity;
         this.mass = mass;
-        this.inv_mass = 1f/mass;
+        this.inv_mass = (mass==0 ? 0 : 1f/mass);
+        this.restitution = 0.5f;
+        this.static_friction  = 0.5f;
+        this.dynamic_friction = 0.3f;
+
+
 
 
         BoundingBox b = this.shape.get_bounding_box(position);
         float width_sq =  b.get_width() * b.get_width();
         float height_sq =  b.get_height() * b.get_height();
-        this.moment_of_inertia = 0.0833f * mass * (width_sq + height_sq);
-        this.inv_moment_of_inertia = 1f/moment_of_inertia;
+        this.inertia = 0.0833f * mass * (width_sq + height_sq);
+        this.inv_inertia = 1f/ inertia;
 
     }
 

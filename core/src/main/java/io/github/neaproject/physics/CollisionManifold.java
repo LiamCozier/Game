@@ -6,6 +6,8 @@ public class CollisionManifold {
     public float minimum_penetration_depth;
     public Vector2 collision_normal;
     public Vector2[] contact_points;
+    public float[] normal_impulses;
+    public float[] tangent_impulses;
 
     public CollisionManifold(float minimum_penetration_depth, Vector2 collision_normal, Vector2[] contact_points) {
         this.minimum_penetration_depth = minimum_penetration_depth;
