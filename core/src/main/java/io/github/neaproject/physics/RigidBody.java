@@ -138,4 +138,8 @@ public class RigidBody extends Particle {
         super.particle_tick(deltaT);
         orientation += angular_velocity * deltaT;
     }
+
+    public BoundingBox get_bounding_box() {
+        return this.shape.get_bounding_box(this.position);
+    }
 }

@@ -21,15 +21,12 @@ public class Main extends ApplicationAdapter {
     OrthographicCamera camera;
 
     ShapeRenderer sr;
-    RigidBody box1;
-    RigidBody box2;
-    RigidBody box3;
+    PhysicsWorld pw;
     List<Vector2> contact_points;
 
     @Override
     public void create() {
-
-        contact_points = new ArrayList<Vector2>(0);
+        pw = new PhysicsWorld();
 
         float height = 40;
         float ppu = Gdx.graphics.getHeight() / height;
@@ -38,19 +35,17 @@ public class Main extends ApplicationAdapter {
 
         sr = new ShapeRenderer();
 
-
-
-        box1 = new RigidBody(
+        RigidBody box1 = new RigidBody(
             new Vector2(-20f, 10f),
             new Vector2(10f, 20f),
             new BoxShape(5, 5),
-            (float)Math.PI*0f,
-            (float)Math.PI*0f,
+            (float)Math.PI*-0.25f,
+            (float)Math.PI*-1e-1f,
             1,
             true
         );
 
-        box2 = new RigidBody(
+        RigidBody box2 = new RigidBody(
             new Vector2(0f, -5f),
             new Vector2(0f, 0f),
             new BoxShape(50, 6),
@@ -60,7 +55,7 @@ public class Main extends ApplicationAdapter {
             false
         );
 
-        box3 = new RigidBody(
+        RigidBody box3 = new RigidBody(
             new Vector2(28f, 17f),
             new Vector2(0f, 0f),
             new BoxShape(6, 50),
@@ -70,49 +65,29 @@ public class Main extends ApplicationAdapter {
             false
         );
 
+        pw.add_body(box1);
+        pw.add_body(box2);
+        pw.add_body(box3);
+
     }
 
 
 
     @Override
     public void render() {
-
-        CollisionManifold cm = null;
-
-        int divisions = 10;
-        int iterations = 25;
-        float delta_time = Gdx.graphics.getDeltaTime() / divisions;
-        for (int i=0; i<divisions; i++) {
-            box1.physics_tick(delta_time);
-            box2.physics_tick(delta_time);
-
-            for (int j=0; j<iterations; j++) {
-                cm = PhysicsManager.sat_overlap(box1.get_polygon(), box2.get_polygon());
-                contact_points.addAll(List.of(cm.contact_points));
-                PhysicsManager.resolve_collision(box1, box2, cm);
-
-                cm = PhysicsManager.sat_overlap(box1.get_polygon(), box3.get_polygon());
-                contact_points.addAll(List.of(cm.contact_points));
-                PhysicsManager.resolve_collision(box1, box3, cm);
-            }
-        }
-
-
-
-
-
-
+        float delta_time = Gdx.graphics.getDeltaTime();
+//        pw.physics_tick(delta_time);
 
         camera_input();
 
         ScreenUtils.clear(0.18f, 0.24f, 0.29f, 1);
         sr.begin(ShapeRenderer.ShapeType.Line);
-
+        RigidBody[] bodies = pw.get_bodies();
         sr.setColor(Color.WHITE);
-        sr.polygon(box1.get_polygon().get_float_array());
-        sr.polygon(box2.get_polygon().get_float_array());
-        sr.polygon(box3.get_polygon().get_float_array());
-        sr.setProjectionMatrix(camera.combined);
+
+        for (RigidBody body: bodies) {
+            sr.polygon(body.get_polygon().get_float_array());
+        }
         sr.end();
 
 

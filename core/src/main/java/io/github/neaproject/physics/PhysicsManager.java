@@ -7,7 +7,7 @@ import java.util.List;
 public class PhysicsManager {
 
 
-    private static boolean aabb_overlap(BoundingBox b1, BoundingBox b2) {
+    public static boolean aabb_overlap(BoundingBox b1, BoundingBox b2) {
         return b1.min.x < b2.max.x &&
             b1.max.x > b2.min.x &&
             b1.min.y < b2.max.y &&
