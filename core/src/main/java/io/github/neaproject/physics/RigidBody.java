@@ -24,7 +24,7 @@ public class RigidBody extends Particle {
         this.angular_velocity = angular_velocity;
         this.mass = mass;
         this.inv_mass = (mass == 0f ? 0f : 1f / mass);
-        this.restitution = 0.5f;
+        this.restitution = 0.6f;
         this.static_friction = 0.5f;
         this.dynamic_friction = 0.3f;
 
@@ -115,8 +115,8 @@ public class RigidBody extends Particle {
         Vector2[] vertices = shape.get_polygon().vertices();
         int vert_count = vertices.length;
 
-        float sin_a = (float) Math.sin(-orientation);
-        float cos_a = (float) Math.cos(-orientation);
+        float sin_a = (float) Math.sin(orientation);
+        float cos_a = (float) Math.cos(orientation);
 
         Vector2[] rotated_verts = new Vector2[vert_count];
         for (int i = 0; i < vert_count; i++) {

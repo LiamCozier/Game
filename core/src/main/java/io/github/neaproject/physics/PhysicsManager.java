@@ -105,18 +105,16 @@ public class PhysicsManager {
         float align2 = cf2.edge_normal.dot(normal);
 
         Polygon ref_poly, inc_poly;
-        ClippingFeatures cf_ref, cf_inc;
+        ClippingFeatures cf_ref;
 
         if (align1 >= align2) {
             ref_poly = p1;
             cf_ref = cf1;
             inc_poly = p2;
-            cf_inc = cf2;
         } else {
             ref_poly = p2;
             cf_ref = cf2;
             inc_poly = p1;
-            cf_inc = cf1;
         }
 
         Vector2[] ref_verts = ref_poly.vertices();
@@ -259,7 +257,6 @@ public class PhysicsManager {
         return features;
     }
 
-
     private static Vector2[] clip_segment(Vector2 a, Vector2 b, Vector2 plane_normal, float plane_offset) {
         final float EPS = 1e-4f;
         List<Vector2> out = new ArrayList<>(2);
@@ -290,13 +287,6 @@ public class PhysicsManager {
     }
 
     public static void resolve_collision(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
-        // sanity checks
-        if (manifold == null ||
-            manifold.collision_normal == null ||
-            manifold.contact_points == null ||
-            manifold.contact_points.length == 0) {
-            return;
-        }
 
         // if both bodies are static, do nothing
         if (body_a.inv_mass + body_b.inv_mass == 0f) {
@@ -324,7 +314,6 @@ public class PhysicsManager {
             manifold.tangent_impulses = new float[contact_count];
         }
 
-        // --- velocity / angular resolution ---
         for (int i = 0; i < contact_count; i++) {
             Vector2 contact_point = manifold.contact_points[i];
 
@@ -368,7 +357,6 @@ public class PhysicsManager {
                 continue;
             }
 
-            // --- normal impulse ---
             float normal_impulse_scalar = -(1f + restitution) * contact_velocity_normal;
             normal_impulse_scalar /= inv_mass_sum;
             normal_impulse_scalar /= contact_count; // split across contacts
@@ -388,7 +376,6 @@ public class PhysicsManager {
 
             manifold.normal_impulses[i] = normal_impulse_scalar;
 
-            // --- friction impulse ---
             // recompute velocities at contact after normal impulse
             velocity_a_at_contact = body_a.velocity.cpy().add(new Vector2(
                 -body_a.angular_velocity * ra.y,
@@ -443,8 +430,8 @@ public class PhysicsManager {
             Vector2 friction_impulse = tangent.cpy().scl(tangent_impulse_scalar);
 
             // apply friction impulse to linear velocity
-            body_a.velocity.sub(friction_impulse.cpy().scl(body_a.inv_mass));
-            body_b.velocity.add(friction_impulse.cpy().scl(body_b.inv_mass));
+            body_a.velocity.sub(friction_impulse.cpy().scl(-body_a.inv_mass));
+            body_b.velocity.add(friction_impulse.cpy().scl(-body_b.inv_mass));
 
             // apply friction impulse to angular velocity
             float ra_cross_jt = ra.x * friction_impulse.y - ra.y * friction_impulse.x;
@@ -456,24 +443,17 @@ public class PhysicsManager {
             manifold.tangent_impulses[i] = tangent_impulse_scalar;
         }
 
-        // --- positional correction (to prevent sinking) ---
         final float penetration_slop = 0.01f;   // ignore tiny penetrations
         final float correction_percent = 0.8f;  // how aggressive the correction is
 
         float inv_mass_sum_bodies = body_a.inv_mass + body_b.inv_mass;
         if (inv_mass_sum_bodies > 0f) {
-            float penetration_depth = Math.max(
-                manifold.minimum_penetration_depth - penetration_slop,
-                0f
-            );
+            float penetration_depth = Math.max(manifold.minimum_penetration_depth - penetration_slop, 0f);
 
             if (penetration_depth > 0f) {
-                Vector2 correction = normal.scl(
-                    penetration_depth * correction_percent / inv_mass_sum_bodies
-                );
-
-                body_a.position.sub(correction.cpy().scl(body_a.inv_mass));
-                body_b.position.add(correction.cpy().scl(body_b.inv_mass));
+                Vector2 correction = normal.scl(penetration_depth * correction_percent / inv_mass_sum_bodies);
+                body_a.position.mulAdd(correction.cpy(), -body_a.inv_mass);
+                body_b.position.mulAdd(correction.cpy(), body_b.inv_mass);
             }
         }
     }

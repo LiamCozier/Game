@@ -1,6 +1,7 @@
 package io.github.neaproject;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -11,31 +12,38 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.neaproject.physics.*;
 import io.github.neaproject.physics.shape.BoxShape;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
+import java.util.ArrayList;
+import java.util.List;
+
+/** {@link ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
 
     OrthographicCamera camera;
-    PhysicsWorld pw;
+
     ShapeRenderer sr;
     RigidBody box1;
     RigidBody box2;
+    RigidBody box3;
+    List<Vector2> contact_points;
 
     @Override
     public void create() {
 
-        float height = 20;
+        contact_points = new ArrayList<Vector2>(0);
+
+        float height = 40;
         float ppu = Gdx.graphics.getHeight() / height;
         float width = Gdx.graphics.getWidth() / ppu;
         camera = new OrthographicCamera(width, height);
 
         sr = new ShapeRenderer();
 
-        pw = new PhysicsWorld();
+
 
         box1 = new RigidBody(
-            new Vector2(-5f, 5f),
-            new Vector2(5f, 5f),
-            new BoxShape(1, 1),
+            new Vector2(-20f, 10f),
+            new Vector2(10f, 20f),
+            new BoxShape(5, 5),
             (float)Math.PI*0f,
             (float)Math.PI*0f,
             1,
@@ -46,14 +54,22 @@ public class Main extends ApplicationAdapter {
             new Vector2(0f, -5f),
             new Vector2(0f, 0f),
             new BoxShape(50, 6),
+            (float)Math.PI*-0.01f,
+            (float)Math.PI*-1e-2f,
+            0,
+            false
+        );
+
+        box3 = new RigidBody(
+            new Vector2(28f, 17f),
+            new Vector2(0f, 0f),
+            new BoxShape(6, 50),
             (float)Math.PI*0f,
             (float)Math.PI*0f,
             0,
             false
         );
 
-        pw.add_body(box1);
-        pw.add_body(box2);
     }
 
 
@@ -61,49 +77,47 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
 
+        CollisionManifold cm = null;
 
-        float delta_time = Gdx.graphics.getDeltaTime();
-         pw.physics_tick(delta_time);
+        int divisions = 10;
+        int iterations = 25;
+        float delta_time = Gdx.graphics.getDeltaTime() / divisions;
+        for (int i=0; i<divisions; i++) {
+            box1.physics_tick(delta_time);
+            box2.physics_tick(delta_time);
+
+            for (int j=0; j<iterations; j++) {
+                cm = PhysicsManager.sat_overlap(box1.get_polygon(), box2.get_polygon());
+                contact_points.addAll(List.of(cm.contact_points));
+                PhysicsManager.resolve_collision(box1, box2, cm);
+
+                cm = PhysicsManager.sat_overlap(box1.get_polygon(), box3.get_polygon());
+                contact_points.addAll(List.of(cm.contact_points));
+                PhysicsManager.resolve_collision(box1, box3, cm);
+            }
+        }
+
+
+
+
+
 
 
         camera_input();
 
         ScreenUtils.clear(0.18f, 0.24f, 0.29f, 1);
         sr.begin(ShapeRenderer.ShapeType.Line);
+
+        sr.setColor(Color.WHITE);
         sr.polygon(box1.get_polygon().get_float_array());
         sr.polygon(box2.get_polygon().get_float_array());
+        sr.polygon(box3.get_polygon().get_float_array());
         sr.setProjectionMatrix(camera.combined);
-
-
-        for (RigidBody r: pw.get_bodies()) {
-            sr.polygon(r.get_polygon().get_float_array());
-        }
         sr.end();
+
+
     }
 
-    private void debugBody(String label, RigidBody body) {
-        System.out.printf(
-            "%s | Pos(%.3f, %.3f)  Vel(%.3f, %.3f)  Angle=%.3f  AngVel=%.3f%n",
-            label,
-            body.position.x, body.position.y,
-            body.velocity.x, body.velocity.y,
-            body.orientation, body.angular_velocity
-        );
-    }
-
-    private void debugContact(CollisionManifold cm) {
-        System.out.printf(
-            "    Contact: depth=%.5f  normal(%.3f, %.3f)  points=%d%n",
-            cm.minimum_penetration_depth,
-            cm.collision_normal.x, cm.collision_normal.y,
-            cm.contact_points.length
-        );
-
-        for (int i = 0; i < cm.contact_points.length; i++) {
-            Vector2 p = cm.contact_points[i];
-            System.out.printf("        P%d (%.3f, %.3f)%n", i, p.x, p.y);
-        }
-    }
 
 
 
