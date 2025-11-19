@@ -8,16 +8,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
-import io.github.neaproject.physics.CollisionManifold;
-import io.github.neaproject.physics.Polygon;
+import io.github.neaproject.physics.*;
 import io.github.neaproject.physics.shape.BoxShape;
-import io.github.neaproject.physics.PhysicsManager;
-import io.github.neaproject.physics.RigidBody;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
 
     OrthographicCamera camera;
+    PhysicsWorld pw;
     ShapeRenderer sr;
     RigidBody box1;
     RigidBody box2;
@@ -32,9 +30,11 @@ public class Main extends ApplicationAdapter {
 
         sr = new ShapeRenderer();
 
+        pw = new PhysicsWorld();
+
         box1 = new RigidBody(
-            new Vector2(-5f, -5f),
-            new Vector2(15f, 25f),
+            new Vector2(-5f, 5f),
+            new Vector2(5f, 5f),
             new BoxShape(1, 1),
             (float)Math.PI*0f,
             (float)Math.PI*0f,
@@ -48,9 +48,12 @@ public class Main extends ApplicationAdapter {
             new BoxShape(50, 6),
             (float)Math.PI*0f,
             (float)Math.PI*0f,
-            100,
+            0,
             false
         );
+
+        pw.add_body(box1);
+        pw.add_body(box2);
     }
 
 
@@ -59,9 +62,9 @@ public class Main extends ApplicationAdapter {
     public void render() {
 
 
-        float deltaT = Gdx.graphics.getDeltaTime();
-        box1.physics_tick(deltaT);
-        box2.physics_tick(deltaT);
+        float delta_time = Gdx.graphics.getDeltaTime();
+         pw.physics_tick(delta_time);
+
 
         camera_input();
 
@@ -71,30 +74,10 @@ public class Main extends ApplicationAdapter {
         sr.polygon(box2.get_polygon().get_float_array());
         sr.setProjectionMatrix(camera.combined);
 
-        Polygon p1 = box1.get_polygon();
-        Polygon p2 = box2.get_polygon();
 
-        sr.setColor(Color.WHITE);
-        if (true) {
-            System.out.println("===== PHYS DEBUG FRAME =====");
-
-            debugBody("Box1", box1);
-            debugBody("Box2", box2);
-
-            CollisionManifold cm = PhysicsManager.sat_overlap(box1.get_polygon(), box2.get_polygon());
-            if (cm.minimum_penetration_depth > 0) {
-                debugContact(cm);
-            }
-
-            System.out.println();
+        for (RigidBody r: pw.get_bodies()) {
+            sr.polygon(r.get_polygon().get_float_array());
         }
-        for (int i=0; i<5; i++) {
-            CollisionManifold cm = PhysicsManager.sat_overlap(p1, p2);
-            PhysicsManager.resolve_collision(box1, box2, cm);
-        }
-
-        sr.polygon(box1.get_polygon().get_float_array());
-        sr.polygon(box2.get_polygon().get_float_array());
         sr.end();
     }
 
