@@ -18,30 +18,36 @@ public class PhysicsWorld {
 
     public void physics_tick(float delta_time) {
 
-        for (int i=0; i<bodies.size(); i++) {
-            for (int j=0; j<bodies.size(); j++) {
-                if (i==j) continue;
+        for (int k=0; k<8; k++) {
+            for (RigidBody body : bodies) {
+                body.physics_tick(delta_time/8);
+            }
 
-                RigidBody body1 = bodies.get(i);
-                RigidBody body2 = bodies.get(j);
+            for (int i = 0; i < bodies.size(); i++) {
+                for (int j = 0; j < bodies.size(); j++) {
+                    if (i == j) continue;
 
-                // ignore if bounding boxes do not intersect
-                if (!PhysicsManager.aabb_overlap(body1.get_bounding_box(), body2.get_bounding_box())) continue;
-                if (body1.mass == 0 && body2.mass == 0) continue;
+                    RigidBody body1 = bodies.get(i);
+                    RigidBody body2 = bodies.get(j);
 
-                // calculate and resolve collision
-                for (int n=0; n<ITERATIONS; n++) {
-                    CollisionManifold cm = PhysicsManager.sat_overlap(body1.get_polygon(), body2.get_polygon());
-                    // ignore if no penetration
-                    if (cm.minimum_penetration_depth < 1e-4f) continue;
-                    PhysicsManager.resolve_collision(body1, body2, cm);
+                    // ignore if bounding boxes do not intersect
+//                    if (!PhysicsManager.aabb_overlap(body1.get_bounding_box(), body2.get_bounding_box())) continue;
+//                    if (body1.mass == 0 && body2.mass == 0) continue;
+
+                    // calculate and resolve collision
+                    for (int n = 0; n < ITERATIONS; n++) {
+                        CollisionManifold cm = PhysicsManager.sat_overlap(body1.get_polygon(), body2.get_polygon());
+                        // ignore if no penetration
+                        if (cm.minimum_penetration_depth < 1e-4f) continue;
+                        PhysicsManager.resolve_collision(body1, body2, cm);
+                    }
                 }
             }
         }
     }
 
     public void add_body(RigidBody body) {
-        bodies.add(new RigidBody(body));
+        bodies.add(body);
     }
 
     public RigidBody[] get_bodies() {

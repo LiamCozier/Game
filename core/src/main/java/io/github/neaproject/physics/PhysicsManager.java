@@ -437,8 +437,8 @@ public class PhysicsManager {
             float ra_cross_jt = ra.x * friction_impulse.y - ra.y * friction_impulse.x;
             float rb_cross_jt = rb.x * friction_impulse.y - rb.y * friction_impulse.x;
 
-            body_a.angular_velocity -= ra_cross_jt * body_a.inv_inertia;
-            body_b.angular_velocity += rb_cross_jt * body_b.inv_inertia;
+            body_a.angular_velocity += ra_cross_jt * body_a.inv_inertia;
+            body_b.angular_velocity -= rb_cross_jt * body_b.inv_inertia;
 
             manifold.tangent_impulses[i] = tangent_impulse_scalar;
         }

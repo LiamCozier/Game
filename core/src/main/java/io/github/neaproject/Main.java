@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.neaproject.physics.*;
 import io.github.neaproject.physics.shape.BoxShape;
@@ -50,7 +51,7 @@ public class Main extends ApplicationAdapter {
             new Vector2(0f, 0f),
             new BoxShape(50, 6),
             (float)Math.PI*-0.01f,
-            (float)Math.PI*-1e-2f,
+            (float)Math.PI*0f,
             0,
             false
         );
@@ -65,7 +66,6 @@ public class Main extends ApplicationAdapter {
             false
         );
 
-        pw.add_body(box1);
         pw.add_body(box2);
         pw.add_body(box3);
 
@@ -76,11 +76,13 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         float delta_time = Gdx.graphics.getDeltaTime();
-//        pw.physics_tick(delta_time);
+
+        pw.physics_tick(delta_time);
 
         camera_input();
 
         ScreenUtils.clear(0.18f, 0.24f, 0.29f, 1);
+        sr.setProjectionMatrix(camera.combined);
         sr.begin(ShapeRenderer.ShapeType.Line);
         RigidBody[] bodies = pw.get_bodies();
         sr.setColor(Color.WHITE);
@@ -90,7 +92,22 @@ public class Main extends ApplicationAdapter {
         }
         sr.end();
 
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            Vector3 temp = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+            Vector2 position = new Vector2(temp.x, temp.y);
 
+            RigidBody box = new RigidBody(
+                position,
+                new Vector2(0f, 0f),
+                new BoxShape(5, 5),
+                (float) Math.PI * 0f,
+                (float) Math.PI * -1e-1f,
+                1,
+                true
+            );
+
+            pw.add_body(box);
+        }
     }
 
 
