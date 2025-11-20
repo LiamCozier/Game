@@ -84,6 +84,8 @@ public class PhysicsManager {
             }
         }
 
+        Vector2 normal = best_axis;
+
         Vector2 c1 = get_centroid(p1);
         Vector2 c2 = get_centroid(p2);
         Vector2 dir = c2.sub(c1);
@@ -91,6 +93,11 @@ public class PhysicsManager {
             best_axis.scl(-1f);
 
         Vector2[] contact_points = calc_contact_points(p1, p2, best_axis, min_overlap);
+
+        if (Math.abs(normal.x) < 1e-4f) normal.x = 0f;
+        if (Math.abs(normal.y) < 1e-4f) normal.y = 0f;
+        normal.nor();
+
 
         return new CollisionManifold(min_overlap, best_axis, contact_points);
     }
@@ -215,7 +222,7 @@ public class PhysicsManager {
         // edge from support -> next
         Vector2 next_edge = vertices[next_index].cpy().sub(support_vertex);
 
-        // Your normal convention: CCW edge → (-ey, ex)
+        // normal convention: CCW edge → (-ey, ex)
         Vector2 prev_normal = new Vector2(-prev_edge.y, prev_edge.x);
         Vector2 next_normal = new Vector2(-next_edge.y, next_edge.x);
 
@@ -293,7 +300,17 @@ public class PhysicsManager {
             return;
         }
 
-        Vector2 normal = manifold.collision_normal.cpy().nor();
+        if (manifold == null ||
+            manifold.collision_normal == null ||
+            manifold.contact_points == null ||
+            manifold.contact_points.length == 0) {
+            return;
+        }
+
+        Vector2 normal = manifold.collision_normal.cpy();
+        if (normal.len2() == 0f) return;
+        normal.nor();
+
         int contact_count = manifold.contact_points.length;
 
         // combine material properties
@@ -322,15 +339,15 @@ public class PhysicsManager {
             Vector2 rb = contact_point.cpy().sub(body_b.position);
 
             // linear + angular velocity at contact points
-            Vector2 velocity_a_at_contact = body_a.velocity.cpy().add(new Vector2(
+            Vector2 velocity_a_at_contact = body_a.velocity.cpy().add(
                 -body_a.angular_velocity * ra.y,
                 body_a.angular_velocity * ra.x
-            ));
+            );
 
-            Vector2 velocity_b_at_contact = body_b.velocity.cpy().add(new Vector2(
+            Vector2 velocity_b_at_contact = body_b.velocity.cpy().add(
                 -body_b.angular_velocity * rb.y,
                 body_b.angular_velocity * rb.x
-            ));
+            );
 
             Vector2 relative_velocity = velocity_b_at_contact.cpy().sub(velocity_a_at_contact);
 
@@ -357,13 +374,14 @@ public class PhysicsManager {
                 continue;
             }
 
+            // --- normal impulse ---
             float normal_impulse_scalar = -(1f + restitution) * contact_velocity_normal;
             normal_impulse_scalar /= inv_mass_sum;
             normal_impulse_scalar /= contact_count; // split across contacts
 
             Vector2 normal_impulse = normal.cpy().scl(normal_impulse_scalar);
 
-            // apply normal impulse to linear velocity
+            // apply normal impulse to linear velocity  (pattern A: -J/m, B: +J/m)
             body_a.velocity.sub(normal_impulse.cpy().scl(body_a.inv_mass));
             body_b.velocity.add(normal_impulse.cpy().scl(body_b.inv_mass));
 
@@ -376,20 +394,22 @@ public class PhysicsManager {
 
             manifold.normal_impulses[i] = normal_impulse_scalar;
 
+            // --- friction impulse ---
+
             // recompute velocities at contact after normal impulse
-            velocity_a_at_contact = body_a.velocity.cpy().add(new Vector2(
+            velocity_a_at_contact = body_a.velocity.cpy().add(
                 -body_a.angular_velocity * ra.y,
                 body_a.angular_velocity * ra.x
-            ));
+            );
 
-            velocity_b_at_contact = body_b.velocity.cpy().add(new Vector2(
+            velocity_b_at_contact = body_b.velocity.cpy().add(
                 -body_b.angular_velocity * rb.y,
                 body_b.angular_velocity * rb.x
-            ));
+            );
 
             relative_velocity = velocity_b_at_contact.cpy().sub(velocity_a_at_contact);
 
-            // build tangent
+            // build tangent = v_tangent direction
             Vector2 tangent = relative_velocity.cpy().sub(
                 normal.cpy().scl(relative_velocity.dot(normal))
             );
@@ -415,25 +435,28 @@ public class PhysicsManager {
                 continue;
             }
 
+            // base friction impulse magnitude
             float tangent_impulse_scalar = -contact_velocity_tangent;
             tangent_impulse_scalar /= inv_mass_sum_tangent;
             tangent_impulse_scalar /= contact_count;
 
-            float abs_tangent_impulse_scalar = Math.abs(tangent_impulse_scalar);
-            float max_static_friction_impulse = normal_impulse_scalar * static_friction;
+            // correct static-friction clamp: use |Jn|
+            float max_static_friction_impulse = Math.abs(normal_impulse_scalar) * static_friction;
 
             // Coulomb friction: clamp or fall back to dynamic
-            if (abs_tangent_impulse_scalar > max_static_friction_impulse) {
-                tangent_impulse_scalar = -normal_impulse_scalar * dynamic_friction * Math.signum(tangent_impulse_scalar);
+            if (Math.abs(tangent_impulse_scalar) > max_static_friction_impulse) {
+                tangent_impulse_scalar =
+                    -Math.signum(contact_velocity_tangent) *
+                        Math.abs(normal_impulse_scalar) * dynamic_friction;
             }
 
             Vector2 friction_impulse = tangent.cpy().scl(tangent_impulse_scalar);
 
             // apply friction impulse to linear velocity
-            body_a.velocity.sub(friction_impulse.cpy().scl(-body_a.inv_mass));
-            body_b.velocity.add(friction_impulse.cpy().scl(-body_b.inv_mass));
+            body_a.velocity.sub(friction_impulse.cpy().scl(body_a.inv_mass));
+            body_b.velocity.add(friction_impulse.cpy().scl(body_b.inv_mass));
 
-            // apply friction impulse to angular velocity
+            // apply friction impulse to angular velocity (same sign pattern as normal)
             float ra_cross_jt = ra.x * friction_impulse.y - ra.y * friction_impulse.x;
             float rb_cross_jt = rb.x * friction_impulse.y - rb.y * friction_impulse.x;
 
@@ -443,20 +466,21 @@ public class PhysicsManager {
             manifold.tangent_impulses[i] = tangent_impulse_scalar;
         }
 
-        final float penetration_slop = 0.01f;   // ignore tiny penetrations
-        final float correction_percent = 0.8f;  // how aggressive the correction is
+        // --- positional correction -
+        float baumgarte = 0.2f;
+        float allowed = 0.01f;
 
-        float inv_mass_sum_bodies = body_a.inv_mass + body_b.inv_mass;
-        if (inv_mass_sum_bodies > 0f) {
-            float penetration_depth = Math.max(manifold.minimum_penetration_depth - penetration_slop, 0f);
+        float penetration = manifold.minimum_penetration_depth - allowed;
+        if (penetration > 0f) {
+            float inv_mass_sum_bodies = body_a.inv_mass + body_b.inv_mass;
+            if (inv_mass_sum_bodies > 0f) {
+                float correction_mag = baumgarte * penetration / inv_mass_sum_bodies;
+                Vector2 correction = normal.cpy().scl(correction_mag);
 
-            if (penetration_depth > 0f) {
-                Vector2 correction = normal.scl(penetration_depth * correction_percent / inv_mass_sum_bodies);
-                body_a.position.mulAdd(correction.cpy(), -body_a.inv_mass);
-                body_b.position.mulAdd(correction.cpy(), body_b.inv_mass);
+                body_a.position.sub(correction.cpy().scl(body_a.inv_mass));
+                body_b.position.add(correction.cpy().scl(body_b.inv_mass));
             }
         }
     }
-
 
 }
