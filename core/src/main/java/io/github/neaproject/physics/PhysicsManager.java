@@ -307,6 +307,8 @@ public class PhysicsManager {
             return;
         }
 
+
+
         Vector2 normal = manifold.collision_normal.cpy();
         if (normal.len2() == 0f) return;
         normal.nor();
@@ -325,11 +327,13 @@ public class PhysicsManager {
                 body_b.dynamic_friction * body_b.dynamic_friction
         );
 
+
         // make sure impulse arrays exist and match contact count
         if (manifold.normal_impulses == null || manifold.normal_impulses.length != contact_count) {
             manifold.normal_impulses = new float[contact_count];
             manifold.tangent_impulses = new float[contact_count];
         }
+
 
         for (int i = 0; i < contact_count; i++) {
             Vector2 contact_point = manifold.contact_points[i];
@@ -348,6 +352,7 @@ public class PhysicsManager {
                 -body_b.angular_velocity * rb.y,
                 body_b.angular_velocity * rb.x
             );
+
 
             Vector2 relative_velocity = velocity_b_at_contact.cpy().sub(velocity_a_at_contact);
 
@@ -374,7 +379,7 @@ public class PhysicsManager {
                 continue;
             }
 
-            // --- normal impulse ---
+            // normal impulse
             float normal_impulse_scalar = -(1f + restitution) * contact_velocity_normal;
             normal_impulse_scalar /= inv_mass_sum;
             normal_impulse_scalar /= contact_count; // split across contacts
@@ -394,7 +399,7 @@ public class PhysicsManager {
 
             manifold.normal_impulses[i] = normal_impulse_scalar;
 
-            // --- friction impulse ---
+            // friction impulse
 
             // recompute velocities at contact after normal impulse
             velocity_a_at_contact = body_a.velocity.cpy().add(
@@ -468,8 +473,8 @@ public class PhysicsManager {
 
         // positional correction
         float slop = 0.01f;
-        float percent = 0.2f;
-        float max_correction = 0.2f;
+        float percent = 0.1f;
+        float max_correction = 0.1f;
 
         float penetration = manifold.minimum_penetration_depth;
         float correction_mag = Math.max(penetration - slop, 0f);

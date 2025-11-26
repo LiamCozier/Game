@@ -17,6 +17,7 @@ import io.github.neaproject.physics.tools.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 /** {@link ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
@@ -122,26 +123,25 @@ public class Main extends ApplicationAdapter {
                 break;
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
+            float radius = 3f;
             List<Vector2> verts = new ArrayList<>(0);
-            float radius = 10f;
-            for (float o=0; o<Math.PI*2; o += Math.PI/16) {
-                float sin_a = (float) Math.sin(o);
-                float cos_a = (float) Math.cos(o);
+            for (float o = 0; o<2f*Math.PI; o+= (float) (Math.PI/64f)) {
+                float sin_a = (float) Math.sin(-o);
+                float cos_a = (float) Math.cos(-o);
 
-                float x = cos_a - sin_a;
-                float y = cos_a + sin_a;
+                float rotated_x =  cos_a - sin_a;
+                float rotated_y =  cos_a + sin_a;
 
-                verts.add(new Vector2(x, y).scl(radius));
+                verts.add(new Vector2(rotated_x, rotated_y).scl(radius));
             }
             Vector3 temp = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
             Vector2 position = new Vector2(temp.x, temp.y);
-
             world.add_body(new RigidBody(
                 position,
-                Vector2.Zero.cpy(),
-                new PolygonShape(verts.toArray(new Vector2[0])),
-                0, 0,
+                new Vector2(0, 5),
+                new PolygonShape(verts.toArray(verts.toArray(new Vector2[0]))),
+                0, (float) Math.PI * -1,
                 (float)Math.PI * radius * radius, true
             ));
         }

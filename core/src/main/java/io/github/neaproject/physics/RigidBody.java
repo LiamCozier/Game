@@ -35,7 +35,6 @@ public class RigidBody extends Particle {
         float height_sq = height * height;
 
         if (mass == 0f) {
-            // Static body: no rotation response
             this.inertia = 0f;
             this.inv_inertia = 0f;
         } else {
@@ -99,7 +98,6 @@ public class RigidBody extends Particle {
         }
 
         if (sum_masses == 0f) {
-            // Fallback: average of vertices
             Vector2 fallback = new Vector2();
             for (Vector2 v : vertices) {
                 fallback.add(v);

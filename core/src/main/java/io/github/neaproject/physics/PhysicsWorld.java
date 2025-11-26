@@ -50,7 +50,7 @@ public class PhysicsWorld {
                 body.physics_tick(sub_dt);
             }
 
-            // ---- 2) BUILD CONTACT LIST ----
+            // build contact list
             contacts.clear();
 
             for (int i = 0; i < body_count; i++) {
@@ -89,7 +89,7 @@ public class PhysicsWorld {
             int contact_count = contacts.size();
             if (contact_count == 0) continue;
 
-            // ---- 3) SOLVE CONTACTS (sequential impulses) ----
+            // solve contacts
             for (int iter = 0; iter < ITERATIONS; iter++) {
                 for (int k = 0; k < contact_count; k++) {
                     Contact c = contacts.get(k);
@@ -97,6 +97,16 @@ public class PhysicsWorld {
                 }
             }
         }
+    }
+
+    public static void debug(RigidBody body) {
+        Vector2[] verts = body.get_polygon().vertices();
+        System.out.print("P_a = ");
+        for (int i=0; i<verts.length; i++) {
+            System.out.print(verts[i].toString());
+            if (i!=verts.length-1) System.out.print(",");
+        }
+        System.out.println();
     }
 
     public void add_body(RigidBody body) {
