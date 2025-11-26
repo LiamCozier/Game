@@ -25,8 +25,8 @@ public class RigidBody extends Particle {
         this.mass = mass;
         this.inv_mass = (mass == 0f ? 0f : 1f / mass);
         this.restitution = 0.6f;
-        this.static_friction = 1f;
-        this.dynamic_friction = 1f;
+        this.static_friction = 0.5f;
+        this.dynamic_friction = 0.3f;
 
         BoundingBox bounding_box = this.shape.get_bounding_box(position);
         float width = bounding_box.get_width();

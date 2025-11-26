@@ -460,27 +460,32 @@ public class PhysicsManager {
             float ra_cross_jt = ra.x * friction_impulse.y - ra.y * friction_impulse.x;
             float rb_cross_jt = rb.x * friction_impulse.y - rb.y * friction_impulse.x;
 
-            body_a.angular_velocity += ra_cross_jt * body_a.inv_inertia;
-            body_b.angular_velocity -= rb_cross_jt * body_b.inv_inertia;
+            body_a.angular_velocity -= ra_cross_jt * body_a.inv_inertia;
+            body_b.angular_velocity += rb_cross_jt * body_b.inv_inertia;
 
             manifold.tangent_impulses[i] = tangent_impulse_scalar;
         }
 
-        // --- positional correction -
-        float baumgarte = 0.2f;
-        float allowed = 0.01f;
+        // positional correction
+        float slop = 0.01f;
+        float percent = 0.2f;
+        float max_correction = 0.2f;
 
-        float penetration = manifold.minimum_penetration_depth - allowed;
-        if (penetration > 0f) {
-            float inv_mass_sum_bodies = body_a.inv_mass + body_b.inv_mass;
-            if (inv_mass_sum_bodies > 0f) {
-                float correction_mag = baumgarte * penetration / inv_mass_sum_bodies;
-                Vector2 correction = normal.cpy().scl(correction_mag);
+        float penetration = manifold.minimum_penetration_depth;
+        float correction_mag = Math.max(penetration - slop, 0f);
+        correction_mag = Math.min(correction_mag, max_correction);
 
-                body_a.position.sub(correction.cpy().scl(body_a.inv_mass));
-                body_b.position.add(correction.cpy().scl(body_b.inv_mass));
-            }
+        correction_mag *= percent;
+
+        float inv_mass_sum = body_a.inv_mass + body_b.inv_mass;
+        if (inv_mass_sum > 0f) {
+            Vector2 correction = normal.cpy().scl(correction_mag / inv_mass_sum);
+
+            body_a.position.sub(correction.cpy().scl(body_a.inv_mass));
+            body_b.position.add(correction.cpy().scl(body_b.inv_mass));
         }
+
+
     }
 
 }
