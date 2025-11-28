@@ -37,7 +37,6 @@ public class BoxCreationTool implements Tool {
         }
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            // still dragging → nothing to update besides rendering
             return;
         }
 
