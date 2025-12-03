@@ -3,16 +3,16 @@ package io.github.neaproject;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import io.github.neaproject.scene.TestScene;
+import io.github.neaproject.scene.*;
 
 /** {@link ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
 
-    TestScene s;
+    Scene s;
 
     @Override
     public void create() {
-        s = new TestScene();
+        s = new UITestScene();
         s.on_open();
     }
 

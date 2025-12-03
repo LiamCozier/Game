@@ -187,7 +187,7 @@ public class TestScene extends Scene{
                 position,
                 new Vector2(0, 5),
                 new PolygonShape(verts.toArray(verts.toArray(new Vector2[0]))),
-                0, (float) Math.PI * -1,
+                0, (float) Math.PI * 0,
                 (float)Math.PI * radius * radius, true
             ));
         }
