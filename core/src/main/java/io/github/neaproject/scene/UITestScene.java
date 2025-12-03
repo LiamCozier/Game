@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.EarClippingTriangulator;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
@@ -34,14 +33,14 @@ public class UITestScene extends Scene {
         Gdx.input.setInputProcessor(cam_input);
 
         sr = new ShapeRenderer();
-        panel = new Panel(new Vector2(0,0), 5, 5, Color.WHITE, Color.GRAY);
-        sub_panel = new Panel(new Vector2(0f,0f), 4, 1, Color.WHITE, Color.GRAY, panel);
+        panel = new Panel(new Vector2(0,15), 5, 5, Color.WHITE, Color.GRAY);
+        sub_panel = new Panel(new Vector2(0.5f,3f), 4, 1, Color.GRAY, Color.GRAY, panel);
     }
 
     @Override
     public void update(float dt) {
-
         input();
+        panel.translate(new Vector2(dt, 0));
     }
 
     @Override
@@ -51,10 +50,8 @@ public class UITestScene extends Scene {
         sr.setProjectionMatrix(camera.combined);
         sr.begin(ShapeRenderer.ShapeType.Filled);
         sr.setColor(Color.WHITE);
-        sr.rect(-5, -5, 1, 1);
-
+        sr.rect(0, 0, 1, 1);
         sr.end();
-        sr.setProjectionMatrix(new Matrix4());
         sr.begin(ShapeRenderer.ShapeType.Filled);
         panel.render(sr, camera);
         sub_panel.render(sr, camera);

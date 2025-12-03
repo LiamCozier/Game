@@ -11,6 +11,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.ShortArray;
+import io.github.neaproject.UI.Panel;
+import io.github.neaproject.UI.UIColors;
 import io.github.neaproject.input.CameraInputProcessor;
 import io.github.neaproject.physics.PhysicsWorld;
 import io.github.neaproject.physics.RigidBody;
@@ -37,6 +39,8 @@ public class TestScene extends Scene{
     BoxDeletionTool DELETE_BOX;
     int current_tool = 0;
 
+    Panel panel;
+
     @Override
     public void on_open() {
         // camera
@@ -60,6 +64,8 @@ public class TestScene extends Scene{
 
         CREATE_BOX = new BoxCreationTool(camera, world);
         DELETE_BOX = new BoxDeletionTool(camera, world);
+
+        panel = new Panel(new Vector2(0, 15), 5, 5, UIColors.DARK_GREY, Color.BLACK);
     }
 
     @Override
@@ -82,6 +88,7 @@ public class TestScene extends Scene{
             draw_filled_polygon(sr, body.get_polygon().get_float_array(), Color.WHITE);
         }
         toolbox.render(sr);
+        panel.render(sr, camera);
         sr.end();
     }
 
@@ -170,7 +177,7 @@ public class TestScene extends Scene{
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
-            float radius = 3f;
+            float radius = 3f * camera.zoom;
             List<Vector2> verts = new ArrayList<>(0);
             for (float o = 0; o<2f*Math.PI; o+= (float) (Math.PI/64f)) {
                 float sin_a = (float) Math.sin(-o);

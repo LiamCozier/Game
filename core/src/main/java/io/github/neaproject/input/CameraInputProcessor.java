@@ -43,7 +43,7 @@ public class CameraInputProcessor implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if (button == Input.Buttons.MIDDLE || button == Input.Buttons.RIGHT) {
+        if (button == Input.Buttons.MIDDLE) {
             middle_pressed = true;
         }
         return false;
@@ -51,7 +51,7 @@ public class CameraInputProcessor implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (button == Input.Buttons.MIDDLE || button == Input.Buttons.RIGHT) {
+        if (button == Input.Buttons.MIDDLE) {
             middle_pressed = false;
         }
         return false;
