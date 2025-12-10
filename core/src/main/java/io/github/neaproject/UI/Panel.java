@@ -24,12 +24,26 @@ public class Panel extends Control{
         this.parent = parent;
     }
 
-    @Override
-    public void render(ShapeRenderer sr, OrthographicCamera camera) {
+//    @Override
+//    public void render(ShapeRenderer sr, OrthographicCamera camera) {
+//
+//        float screenW = width * camera.zoom;
+//        float screenH = height * camera.zoom;
+//        Vector2 screen_position = this.position();
+//
+//        // Set color based on render mode
+//        if (sr.getCurrentType() == ShapeRenderer.ShapeType.Filled) {
+//            sr.setColor(fill_color);
+//        } else {
+//            sr.setColor(outline_color);
+//        }
+//
+//        sr.rect(screen_position.x, screen_position.y, screenW, screenH);
+//    }
 
-        float screenW = width * camera.zoom;
-        float screenH = height * camera.zoom;
-        Vector2 world_position = this.screen_position(camera);
+    @Override
+    public void render(ShapeRenderer sr) {
+        Vector2 position = this.position();
 
         // Set color based on render mode
         if (sr.getCurrentType() == ShapeRenderer.ShapeType.Filled) {
@@ -38,7 +52,7 @@ public class Panel extends Control{
             sr.setColor(outline_color);
         }
 
-        sr.rect(world_position.x, world_position.y, screenW, screenH);
+        sr.rect(position.x, -position.y-height, width, height);
     }
 
 

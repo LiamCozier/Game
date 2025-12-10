@@ -49,7 +49,7 @@ public class TestScene extends Scene{
         float width = Gdx.graphics.getWidth() / ppu;
         camera = new OrthographicCamera(width, height);
 
-        cam_input = new CameraInputProcessor(camera);
+        cam_input = new CameraInputProcessor();
         Gdx.input.setInputProcessor(cam_input);
 
         world = new PhysicsWorld();

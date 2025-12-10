@@ -8,8 +8,6 @@ import com.badlogic.gdx.math.Vector2;
 
 public class CameraInputProcessor implements InputProcessor {
 
-    public OrthographicCamera camera;
-
     public boolean middle_pressed = false;
     public float scroll_amount = 0;
     public Vector2 delta = new Vector2();
@@ -17,9 +15,7 @@ public class CameraInputProcessor implements InputProcessor {
     private Vector2 last = new Vector2();
 
 
-    public CameraInputProcessor(OrthographicCamera camera) {
-        this.camera = camera;
-
+    public CameraInputProcessor() {
         mouse_screen.x = Gdx.input.getX() - Gdx.graphics.getWidth()/2f;
         mouse_screen.y = Gdx.input.getY() - Gdx.graphics.getHeight()/2f;
         last.x = Gdx.input.getX();
@@ -43,7 +39,7 @@ public class CameraInputProcessor implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if (button == Input.Buttons.MIDDLE) {
+        if (button == Input.Buttons.RIGHT) {
             middle_pressed = true;
         }
         return false;
@@ -51,7 +47,7 @@ public class CameraInputProcessor implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        if (button == Input.Buttons.MIDDLE) {
+        if (button == Input.Buttons.RIGHT) {
             middle_pressed = false;
         }
         return false;

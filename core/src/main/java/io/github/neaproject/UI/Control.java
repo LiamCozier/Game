@@ -27,7 +27,7 @@ public abstract class Control {
         this.parent = parent;
     }
 
-    public abstract void render(ShapeRenderer sr, OrthographicCamera camera);
+    public abstract void render(ShapeRenderer sr);
 
     public Vector2 position() {
         if (this.parent == null) {
