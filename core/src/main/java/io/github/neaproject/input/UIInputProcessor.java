@@ -1,10 +1,15 @@
 package io.github.neaproject.input;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
 public class UIInputProcessor implements InputProcessor {
     @Override
     public boolean keyDown(int keycode) {
+        if (keycode == Input.Keys.ESCAPE) {
+            Gdx.app.exit();
+        }
         return false;
     }
 

@@ -1,12 +1,10 @@
 package io.github.neaproject.scene;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Vector2;
@@ -14,21 +12,25 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.ShortArray;
-import io.github.neaproject.UI.Panel;
+import io.github.neaproject.UI.*;
 import io.github.neaproject.input.CameraInputProcessor;
+import io.github.neaproject.input.UIInputProcessor;
 
 public class UITestScene extends Scene {
 
     OrthographicCamera camera;
     OrthographicCamera ui_camera;
+
     CameraInputProcessor cam_input;
+    UIInputProcessor ui_input;
+    InputMultiplexer multiplexer;
 
     ShapeRenderer sr;
     Panel panel;
-    Panel sub_panel;
+    TextBox text;
 
     SpriteBatch batch;
-    BitmapFont font;
+
 
 
     @Override
@@ -38,25 +40,27 @@ public class UITestScene extends Scene {
         float ppu = Gdx.graphics.getHeight() / height;
         float width = Gdx.graphics.getWidth() / ppu;
         camera = new OrthographicCamera(width, height);
-        cam_input = new CameraInputProcessor();
-        Gdx.input.setInputProcessor(cam_input);
 
         ui_camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         ui_camera.translate(new Vector2(Gdx.graphics.getWidth(), -Gdx.graphics.getHeight()).scl(0.5f));
+        ui_camera.zoom = 1f;
         ui_camera.update();
 
         sr = new ShapeRenderer();
-        panel = new Panel(new Vector2(10,10), 100, 100, Color.WHITE, Color.GRAY);
-        sub_panel = new Panel(new Vector2(10,10), 80, 20, Color.GRAY, Color.GRAY, panel);
-
         batch = new SpriteBatch();
 
-        Texture texture = new Texture(Gdx.files.internal("fonts/arial.png"));
-        texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        panel = new Panel(new Vector2(10, 10), 300, 300, Color.WHITE, Color.GRAY);
+        text = new TextBox(new Vector2(20, 20), 260, 260, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", Color.BLACK, panel);
 
-        font = new BitmapFont(Gdx.files.internal("fonts/arial.fnt"), new TextureRegion(texture));
-        font.getData().scale(.5f);
+        multiplexer = new InputMultiplexer();
+        cam_input = new CameraInputProcessor();
+        ui_input = new UIInputProcessor();
+        multiplexer.addProcessor(cam_input);
+        multiplexer.addProcessor(ui_input);
+        Gdx.input.setInputProcessor(multiplexer);
+
     }
+
 
     @Override
     public void update(float dt) {
@@ -70,19 +74,19 @@ public class UITestScene extends Scene {
         sr.setProjectionMatrix(camera.combined);
         sr.begin(ShapeRenderer.ShapeType.Filled);
         sr.setColor(Color.WHITE);
-        sr.rect(0, 0, 250, 1);
+        sr.rect(0, 0, 1, 1);
         sr.end();
 
         // render UI
         sr.setProjectionMatrix(ui_camera.combined);
         sr.begin(ShapeRenderer.ShapeType.Filled);
-        panel.render(sr);
-        sub_panel.render(sr);
+        panel.shape_render(sr);
         sr.end();
 
+        ui_camera.update();
         batch.setProjectionMatrix(ui_camera.combined);
         batch.begin();
-        font.draw(batch, "Hello World", 0, 0, 30f, 1, true);
+        text.batch_render(batch);
         batch.end();
 
     }

@@ -1,6 +1,7 @@
 package io.github.neaproject.UI;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -27,7 +28,8 @@ public abstract class Control {
         this.parent = parent;
     }
 
-    public abstract void render(ShapeRenderer sr);
+    public abstract void shape_render(ShapeRenderer sr);
+    public abstract void batch_render(SpriteBatch batch);
 
     public Vector2 position() {
         if (this.parent == null) {

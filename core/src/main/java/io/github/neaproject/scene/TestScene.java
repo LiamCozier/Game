@@ -88,7 +88,7 @@ public class TestScene extends Scene{
             draw_filled_polygon(sr, body.get_polygon().get_float_array(), Color.WHITE);
         }
         toolbox.render(sr);
-        panel.render(sr, camera);
+        panel.shape_render(sr);
         sr.end();
     }
 
