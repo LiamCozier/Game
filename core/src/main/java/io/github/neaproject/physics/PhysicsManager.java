@@ -489,8 +489,6 @@ public class PhysicsManager {
             body_a.position.sub(correction.cpy().scl(body_a.inv_mass));
             body_b.position.add(correction.cpy().scl(body_b.inv_mass));
         }
-
-
     }
 
 }

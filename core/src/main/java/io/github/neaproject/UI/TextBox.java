@@ -26,7 +26,7 @@ public class TextBox extends Control{
         this.text = text;
         font = new BitmapFont(Gdx.files.internal("fonts/mono.fnt"), new TextureRegion(texture));
         font.getData().setScale(1f);
-        font.setColor(color);
+        font.setColor(new Color(color));
     }
 
     public TextBox(Vector2 position, float width, float height, String text, Color color, Control parent) {

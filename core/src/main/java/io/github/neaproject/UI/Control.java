@@ -1,5 +1,6 @@
 package io.github.neaproject.UI;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Control {
+
+    public static final Color DARK_GREY = new Color(0.1f, 0.1f, 0.1f, 1);
 
     // (0, 0) is bottom right of screen
     // y is upwards

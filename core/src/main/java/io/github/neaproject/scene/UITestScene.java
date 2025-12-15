@@ -50,7 +50,7 @@ public class UITestScene extends Scene {
         batch = new SpriteBatch();
 
         panel = new Panel(new Vector2(10, 10), 300, 300, Color.WHITE, Color.GRAY);
-        text = new TextBox(new Vector2(20, 20), 260, 260, "Lorem ipsum dolor sit amet, consectetur adipiscing elit.", Color.BLACK, panel);
+        text = new TextBox(new Vector2(20, 20), 260, 260, "a thing called deduction", Control.DARK_GREY, panel);
 
         multiplexer = new InputMultiplexer();
         cam_input = new CameraInputProcessor();
@@ -65,6 +65,7 @@ public class UITestScene extends Scene {
     @Override
     public void update(float dt) {
         input();
+        panel.translate(new Vector2(Gdx.input.getDeltaX(), Gdx.input.getDeltaY()));
     }
 
     @Override
