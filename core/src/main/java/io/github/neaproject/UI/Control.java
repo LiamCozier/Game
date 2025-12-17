@@ -29,6 +29,7 @@ public abstract class Control {
     public Control(Vector2 viewport_position, Control parent) {
         this(viewport_position);
         this.parent = parent;
+        parent.add_child(this);
     }
 
     public abstract void shape_render(ShapeRenderer sr);
@@ -50,6 +51,14 @@ public abstract class Control {
         Vector2 offset = new Vector2(camera.viewportWidth, camera.viewportHeight).scl(-0.5f * camera.zoom);
         offset.add(camera.position.x, camera.position.y);
         return position().scl(camera.zoom).add(offset);
+    }
+
+    public void add_child(Control child) {
+        this.children.add(child);
+    }
+
+    public List<Control> get_children() {
+        return this.children;
     }
 
 

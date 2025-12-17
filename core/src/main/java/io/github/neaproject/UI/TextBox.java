@@ -32,6 +32,7 @@ public class TextBox extends Control{
     public TextBox(Vector2 position, float width, float height, String text, Color color, Control parent) {
         this(position, width, height, text, color);
         this.parent = parent;
+        parent.add_child(this);
     }
 
     @Override

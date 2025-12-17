@@ -65,7 +65,7 @@ public class TestScene extends Scene{
         CREATE_BOX = new BoxCreationTool(camera, world);
         DELETE_BOX = new BoxDeletionTool(camera, world);
 
-        panel = new Panel(new Vector2(0, 15), 5, 5, UIColors.DARK_GREY, Color.BLACK);
+        panel = new Panel(new Vector2(0, 15), 5, 5, UIColors.DARK_GREY);
     }
 
     @Override

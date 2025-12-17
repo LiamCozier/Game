@@ -5,19 +5,20 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
-public class Panel extends Control{
+public class Button extends Control implements Hoverable{
 
     float width, height;
-    Color color;
+    Color color, off_color, on_color;
 
-    public Panel(Vector2 position, float width, float height, Color color) {
+    public Button(Vector2 position, float width, float height, Color color) {
         super(position);
         this.width = width;
         this.height = height;
         this.color = color;
+        off_color = new Color(color);
     }
 
-    public Panel(Vector2 position, float width, float height, Color color, Control parent) {
+    public Button(Vector2 position, float width, float height, Color color, Control parent) {
         this(position, width, height, color);
         this.parent = parent;
         parent.add_child(this);
@@ -33,4 +34,13 @@ public class Panel extends Control{
     public void batch_render(SpriteBatch batch) {}
 
 
+    @Override
+    public void on_hover() {
+
+    }
+
+    @Override
+    public void on_unhover() {
+
+    }
 }

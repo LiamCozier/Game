@@ -26,10 +26,12 @@ public class UITestScene extends Scene {
     InputMultiplexer multiplexer;
 
     ShapeRenderer sr;
+    SpriteBatch batch;
+
+
     Panel panel;
     TextBox text;
-
-    SpriteBatch batch;
+    UIManager ui_manager;
 
 
 
@@ -49,14 +51,16 @@ public class UITestScene extends Scene {
         sr = new ShapeRenderer();
         batch = new SpriteBatch();
 
-        panel = new Panel(new Vector2(10, 10), 300, 300, Color.WHITE, Color.GRAY);
+        ui_manager = new UIManager();
+        panel = new Panel(new Vector2(10, 10), 300, 300, Color.WHITE);
         text = new TextBox(new Vector2(20, 20), 260, 260, "a thing called deduction", Control.DARK_GREY, panel);
+        ui_manager.add_node(panel);
 
-        multiplexer = new InputMultiplexer();
-        cam_input = new CameraInputProcessor();
         ui_input = new UIInputProcessor();
-        multiplexer.addProcessor(cam_input);
+        cam_input = new CameraInputProcessor();
+        multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(ui_input);
+        multiplexer.addProcessor(cam_input);
         Gdx.input.setInputProcessor(multiplexer);
 
     }
@@ -65,7 +69,6 @@ public class UITestScene extends Scene {
     @Override
     public void update(float dt) {
         input();
-        panel.translate(new Vector2(Gdx.input.getDeltaX(), Gdx.input.getDeltaY()));
     }
 
     @Override
@@ -80,15 +83,8 @@ public class UITestScene extends Scene {
 
         // render UI
         sr.setProjectionMatrix(ui_camera.combined);
-        sr.begin(ShapeRenderer.ShapeType.Filled);
-        panel.shape_render(sr);
-        sr.end();
-
-        ui_camera.update();
         batch.setProjectionMatrix(ui_camera.combined);
-        batch.begin();
-        text.batch_render(batch);
-        batch.end();
+        ui_manager.render_all(sr, batch);
 
     }
 
