@@ -13,21 +13,24 @@ public abstract class Control {
 
     public static final Color DARK_GREY = new Color(0.1f, 0.1f, 0.1f, 1);
 
-    // (0, 0) is bottom right of screen
-    // y is upwards
+    // (0, 0) is top right of screen
+    // y is downwards
 
     protected Vector2 viewport_position;
     protected Control parent;
     protected List<Control> children;
+    protected float width, height;
 
-    public Control(Vector2 viewport_position) {
+    public Control(Vector2 viewport_position, float width, float height) {
         this.viewport_position = viewport_position;
+        this.width = width;
+        this.height = height;
         this.children = new ArrayList<>(0);
         parent = null;
     }
 
-    public Control(Vector2 viewport_position, Control parent) {
-        this(viewport_position);
+    public Control(Vector2 viewport_position, float width, float height, Control parent) {
+        this(viewport_position, width, height);
         this.parent = parent;
         parent.add_child(this);
     }
@@ -61,5 +64,19 @@ public abstract class Control {
         return this.children;
     }
 
+    public float get_width() {
+        return width;
+    }
 
+    public void set_width(float width) {
+        this.width = width;
+    }
+
+    public float get_height() {
+        return height;
+    }
+
+    public void set_height(float height) {
+        this.height = height;
+    }
 }

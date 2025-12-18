@@ -3,8 +3,12 @@ package io.github.neaproject.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.math.Vector2;
 
 public class UIInputProcessor implements InputProcessor {
+
+    public Vector2 mouse_position = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.ESCAPE) {
@@ -45,6 +49,7 @@ public class UIInputProcessor implements InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        mouse_position.set(screenX, screenY);
         return false;
     }
 

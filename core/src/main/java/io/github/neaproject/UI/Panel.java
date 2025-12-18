@@ -7,13 +7,10 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Panel extends Control{
 
-    float width, height;
     Color color;
 
     public Panel(Vector2 position, float width, float height, Color color) {
-        super(position);
-        this.width = width;
-        this.height = height;
+        super(position, width, height);
         this.color = color;
     }
 

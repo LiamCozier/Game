@@ -11,14 +11,11 @@ import com.badlogic.gdx.math.Vector2;
 
 public class TextBox extends Control{
 
-    float width, height;
     String text;
     BitmapFont font;
 
     public TextBox(Vector2 position, float width, float height, String text, Color color) {
-        super(position);
-        this.width = width;
-        this.height = height;
+        super(position, width, height);
 
         Texture texture = new Texture(Gdx.files.internal("fonts/mono.png"));
         texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);

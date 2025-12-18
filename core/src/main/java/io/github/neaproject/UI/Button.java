@@ -5,17 +5,16 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
-public class Button extends Control implements Hoverable{
+public class Button extends Control implements Hoverable {
 
-    float width, height;
     Color color, off_color, on_color;
+    boolean hovering;
 
     public Button(Vector2 position, float width, float height, Color color) {
-        super(position);
-        this.width = width;
-        this.height = height;
+        super(position, width, height);
         this.color = color;
         off_color = new Color(color);
+        on_color = color.cpy().add(0.1f, 0.1f, 0.1f, 1);
     }
 
     public Button(Vector2 position, float width, float height, Color color, Control parent) {
@@ -36,11 +35,20 @@ public class Button extends Control implements Hoverable{
 
     @Override
     public void on_hover() {
-
+        color.set(on_color.cpy());
+        hovering = true;
     }
 
     @Override
     public void on_unhover() {
-
+        color.set(off_color.cpy());
+        hovering = false;
     }
+
+    @Override
+    public boolean is_hovering() {
+        return hovering;
+    }
+
+
 }

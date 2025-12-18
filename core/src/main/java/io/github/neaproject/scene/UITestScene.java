@@ -31,6 +31,7 @@ public class UITestScene extends Scene {
 
     Panel panel;
     TextBox text;
+    Button button;
     UIManager ui_manager;
 
 
@@ -53,7 +54,9 @@ public class UITestScene extends Scene {
 
         ui_manager = new UIManager();
         panel = new Panel(new Vector2(10, 10), 300, 300, Color.WHITE);
-        text = new TextBox(new Vector2(20, 20), 260, 260, "a thing called deduction", Control.DARK_GREY, panel);
+        text = new TextBox(new Vector2(20, 20), 260, 260, "The button.", Control.DARK_GREY, panel);
+        button = new Button(new Vector2(20, 60), 260, 220, Color.DARK_GRAY, panel);
+
         ui_manager.add_node(panel);
 
         ui_input = new UIInputProcessor();
@@ -68,7 +71,10 @@ public class UITestScene extends Scene {
 
     @Override
     public void update(float dt) {
+
+        ui_manager.take_input(ui_input, ui_camera);
         input();
+
     }
 
     @Override
@@ -88,26 +94,8 @@ public class UITestScene extends Scene {
 
     }
 
-    public void draw_filled_polygon(ShapeRenderer sr, float[] verts, Color color) {
-        EarClippingTriangulator triangulator = new EarClippingTriangulator();
-        ShortArray tris = triangulator.computeTriangles(new FloatArray(verts));
-
-        sr.setColor(color);
-
-        for (int i = 0; i < tris.size; i += 3) {
-            int i1 = tris.get(i) * 2;
-            int i2 = tris.get(i + 1) * 2;
-            int i3 = tris.get(i + 2) * 2;
-
-            sr.triangle(
-                verts[i1],     verts[i1 + 1],
-                verts[i2],     verts[i2 + 1],
-                verts[i3],     verts[i3 + 1]
-            );
-        }
-    }
-
-    public void input() {
+    public void
+    input() {
 
         // pan camera
         if (cam_input.middle_pressed) {
