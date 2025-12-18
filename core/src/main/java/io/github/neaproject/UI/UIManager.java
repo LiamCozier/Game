@@ -1,19 +1,14 @@
 package io.github.neaproject.UI;
 
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import io.github.neaproject.input.UIInputProcessor;
 
-import java.net.InterfaceAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class UIManager {
@@ -45,32 +40,34 @@ public class UIManager {
     }
 
     public void take_input(UIInputProcessor input, Camera camera) {
+        Vector3 mouse_world3 = camera.unproject(new Vector3(input.mouse_position.x, input.mouse_position.y, 0));
+        Vector2 mouse_screen = new Vector2(mouse_world3.x, -mouse_world3.y);
 
         for (Control node: nodes) {
 
-            Class<?>[] interfaces = node.getClass().getInterfaces();
+            Vector2 position = node.position();
+            float width = node.get_width();
+            float height = node.get_height();
 
-            // if hoverable
+            boolean inside = mouse_screen.x >= position.x && mouse_screen.x <= position.x + width &&
+                mouse_screen.y >= position.y && mouse_screen.y <= position.y + height;
+
             if (node instanceof Hoverable) {
                 Hoverable hoverable = (Hoverable) node;
 
-                Vector3 position = camera.unproject(new Vector3(input.mouse_position.x, input.mouse_position.y, 0));
-                Vector2 screen_position = new Vector2 (position.x, position.y);
-                Vector2 lower_bound = new Vector2(position.x, position.y);
-                Vector2 upper_bound = new Vector2(position.x + node.get_width(), position.y - node.get_height());
-
-                System.out.println(lower_bound);
-                System.out.println(upper_bound);
-                System.out.println(input.mouse_position);
-
-                if (input.mouse_position.x > lower_bound.x && input.mouse_position.x < upper_bound.x &&
-                    input.mouse_position.y > lower_bound.y && input.mouse_position.y < upper_bound.y) {
-                    hoverable.on_hover();
-                } else if(hoverable.is_hovering()) {
-                    hoverable.on_unhover();
-                }
+                if (inside) hoverable.on_hover();
+                else if (hoverable.is_hovering()) hoverable.on_unhover();
             }
-        }
 
+            if (node instanceof Clickable) {
+                Clickable clickable = (Clickable) node;
+
+
+                if (inside && input.left_just_pressed) clickable.on_click();
+                if (clickable.is_holding() && input.left_just_released) clickable.on_release();
+            }
+
+
+        }
     }
 }

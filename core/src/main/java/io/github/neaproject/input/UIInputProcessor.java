@@ -9,6 +9,11 @@ public class UIInputProcessor implements InputProcessor {
 
     public Vector2 mouse_position = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 
+    public boolean left_pressed = false;
+    public boolean left_just_pressed = false;
+    public boolean left_just_released = false;
+    public boolean left_pressed_prev = false;
+
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.ESCAPE) {
@@ -29,11 +34,19 @@ public class UIInputProcessor implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (button == Input.Buttons.LEFT) {
+            left_pressed = true;
+            left_just_pressed = true;
+        }
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (button == Input.Buttons.LEFT){
+            left_pressed = false;
+            left_just_released = true;
+        }
         return false;
     }
 
@@ -56,5 +69,13 @@ public class UIInputProcessor implements InputProcessor {
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
+    }
+
+    public void begin_frame() {
+
+        // resets at start of each frame so that the input only lasts for one
+        left_just_pressed  = left_pressed && !left_pressed_prev;
+        left_just_released = !left_pressed && left_pressed_prev;
+        left_pressed_prev = left_pressed;
     }
 }

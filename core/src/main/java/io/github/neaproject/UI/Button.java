@@ -5,10 +5,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
-public class Button extends Control implements Hoverable {
+public class Button extends Control implements Hoverable, Clickable {
 
     Color color, off_color, on_color;
-    boolean hovering;
+    boolean hovering, pressing;
+    Runnable click_action, release_action;
 
     public Button(Vector2 position, float width, float height, Color color) {
         super(position, width, height);
@@ -48,6 +49,31 @@ public class Button extends Control implements Hoverable {
     @Override
     public boolean is_hovering() {
         return hovering;
+    }
+
+    @Override
+    public void on_click() {
+        if (click_action == null) return;
+        click_action.run();
+        pressing = true;
+    }
+
+    @Override
+    public void on_release() {
+        if (release_action == null) return;
+        release_action.run();
+        pressing = false;
+    }
+
+    @Override
+    public boolean is_holding() {return pressing;}
+
+    public void set_click_action(Runnable r) {
+        this.click_action = r;
+    }
+
+    public void set_release_action(Runnable r) {
+        this.release_action = r;
     }
 
 

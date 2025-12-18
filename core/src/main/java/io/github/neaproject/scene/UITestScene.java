@@ -6,12 +6,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.ShortArray;
 import io.github.neaproject.UI.*;
 import io.github.neaproject.input.CameraInputProcessor;
 import io.github.neaproject.input.UIInputProcessor;
@@ -57,6 +54,9 @@ public class UITestScene extends Scene {
         text = new TextBox(new Vector2(20, 20), 260, 260, "The button.", Control.DARK_GREY, panel);
         button = new Button(new Vector2(20, 60), 260, 220, Color.DARK_GRAY, panel);
 
+        button.set_click_action(() -> button.translate(new Vector2(500, 0)));
+        button.set_release_action(() -> button.translate(new Vector2(-500, 0)));
+
         ui_manager.add_node(panel);
 
         ui_input = new UIInputProcessor();
@@ -71,10 +71,9 @@ public class UITestScene extends Scene {
 
     @Override
     public void update(float dt) {
-
+        ui_input.begin_frame();
         ui_manager.take_input(ui_input, ui_camera);
         input();
-
     }
 
     @Override
@@ -105,7 +104,7 @@ public class UITestScene extends Scene {
             // prevent drift from no mouse movement
             cam_input.delta.set(0,0);
 
-            float inv_ppu = (float) camera.viewportHeight / Gdx.graphics.getHeight();
+            float inv_ppu = camera.viewportHeight / Gdx.graphics.getHeight();
             camera_delta.scl(inv_ppu);
 
             camera.translate(camera_delta.x, camera_delta.y);
