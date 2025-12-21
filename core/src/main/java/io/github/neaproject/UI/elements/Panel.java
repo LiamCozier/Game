@@ -1,4 +1,4 @@
-package io.github.neaproject.UI;
+package io.github.neaproject.UI.elements;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -26,6 +26,7 @@ public class Panel extends Control{
         sr.setColor(color);
         sr.rect(position.x, -position.y-height, width, height);
     }
+
     @Override
     public void batch_render(SpriteBatch batch) {}
 

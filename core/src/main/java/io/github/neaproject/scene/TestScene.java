@@ -11,8 +11,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.ShortArray;
-import io.github.neaproject.UI.Panel;
-import io.github.neaproject.UI.UIColors;
+import io.github.neaproject.UI.elements.Control;
+import io.github.neaproject.UI.elements.Panel;
 import io.github.neaproject.input.CameraInputProcessor;
 import io.github.neaproject.physics.PhysicsWorld;
 import io.github.neaproject.physics.RigidBody;
@@ -41,6 +41,10 @@ public class TestScene extends Scene{
 
     Panel panel;
 
+    public TestScene(SceneManager manager) {
+        super(manager);
+    }
+
     @Override
     public void on_open() {
         // camera
@@ -65,7 +69,7 @@ public class TestScene extends Scene{
         CREATE_BOX = new BoxCreationTool(camera, world);
         DELETE_BOX = new BoxDeletionTool(camera, world);
 
-        panel = new Panel(new Vector2(0, 15), 5, 5, UIColors.DARK_GREY);
+        panel = new Panel(new Vector2(0, 15), 5, 5, Control.DARK_GREY.cpy());
     }
 
     @Override
@@ -78,10 +82,10 @@ public class TestScene extends Scene{
 
     @Override
     public void render() {
-        ScreenUtils.clear(0.18f, 0.24f, 0.29f, 1);
+        ScreenUtils.clear(0f, 0f, 0f, 1);
 
         sr.setProjectionMatrix(camera.combined);
-        sr.begin(ShapeRenderer.ShapeType.Filled);
+        sr.begin(ShapeRenderer.ShapeType.Line);
         sr.setColor(Color.WHITE);
         RigidBody[] bodies = world.get_bodies();
         for (RigidBody body: bodies) {

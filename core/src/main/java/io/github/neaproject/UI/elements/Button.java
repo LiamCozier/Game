@@ -1,9 +1,11 @@
-package io.github.neaproject.UI;
+package io.github.neaproject.UI.elements;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import io.github.neaproject.UI.interfaces.Clickable;
+import io.github.neaproject.UI.interfaces.Hoverable;
 
 public class Button extends Control implements Hoverable, Clickable {
 
@@ -53,9 +55,10 @@ public class Button extends Control implements Hoverable, Clickable {
 
     @Override
     public void on_click() {
+        pressing = true;
+
         if (click_action == null) return;
         click_action.run();
-        pressing = true;
     }
 
     @Override

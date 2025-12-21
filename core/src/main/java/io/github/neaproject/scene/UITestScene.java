@@ -8,8 +8,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.neaproject.UI.*;
+import io.github.neaproject.UI.elements.Button;
+import io.github.neaproject.UI.elements.Control;
+import io.github.neaproject.UI.elements.Panel;
+import io.github.neaproject.UI.elements.TextBox;
 import io.github.neaproject.input.CameraInputProcessor;
 import io.github.neaproject.input.UIInputProcessor;
 
@@ -25,12 +28,14 @@ public class UITestScene extends Scene {
     ShapeRenderer sr;
     SpriteBatch batch;
 
-
     Panel panel;
     TextBox text;
-    Button button;
+    Button button, button2;
     UIManager ui_manager;
 
+    public UITestScene(SceneManager manager) {
+        super(manager);
+    }
 
 
     @Override
@@ -50,12 +55,15 @@ public class UITestScene extends Scene {
         batch = new SpriteBatch();
 
         ui_manager = new UIManager();
-        panel = new Panel(new Vector2(10, 10), 300, 300, Color.WHITE);
-        text = new TextBox(new Vector2(20, 20), 260, 260, "The button.", Control.DARK_GREY, panel);
-        button = new Button(new Vector2(20, 60), 260, 220, Color.DARK_GRAY, panel);
+        panel = new Panel(new Vector2(10, 10), 300, 600, Color.WHITE);
+        text = new TextBox(new Vector2(20, 20), 260, 260, "The buttons.", Control.DARK_GREY.cpy(), 1f, panel);
+        button = new Button(new Vector2(20, 60), 260, 220, Control.DARK_GREY.cpy(), panel);
+        button2 = new Button(new Vector2(20, 360), 260, 220, Control.DARK_GREY.cpy(), panel);
 
-        button.set_click_action(() -> button.translate(new Vector2(500, 0)));
-        button.set_release_action(() -> button.translate(new Vector2(-500, 0)));
+        button.set_click_action(() -> button.set_height(200));
+        button.set_release_action(() -> button.set_height(220));
+
+        button2.set_release_action(() -> manager.set_scene(new TestScene(manager)));
 
         ui_manager.add_node(panel);
 
@@ -78,7 +86,6 @@ public class UITestScene extends Scene {
 
     @Override
     public void render() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.15f, 0);
 
         sr.setProjectionMatrix(camera.combined);
         sr.begin(ShapeRenderer.ShapeType.Filled);

@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import io.github.neaproject.UI.elements.Control;
+import io.github.neaproject.UI.interfaces.Clickable;
+import io.github.neaproject.UI.interfaces.Hoverable;
 import io.github.neaproject.input.UIInputProcessor;
 
 import java.util.ArrayList;
@@ -15,13 +18,16 @@ public class UIManager {
 
     List<Control> nodes;
 
+    Clickable captured_clickable;
+
     public UIManager() {
         nodes = new ArrayList<>(0);
+        captured_clickable = null;
     }
 
     public void add_node(Control node) {
         nodes.add(node);
-        nodes.addAll(node.get_children());
+        for (Control child: node.get_children()) add_node(child);
     }
 
     public void add_node(Control node, boolean add_children) {
@@ -31,11 +37,17 @@ public class UIManager {
 
     public void render_all(ShapeRenderer sr, SpriteBatch batch) {
         sr.begin(ShapeRenderer.ShapeType.Filled);
-        for (Control node: nodes) {node.shape_render(sr);}
+        for (Control node: nodes) {
+            if (node.is_invisible()) continue;
+            node.shape_render(sr);
+        }
         sr.end();
 
         batch.begin();
-        for (Control node: nodes) {node.batch_render(batch);}
+        for (Control node: nodes) {
+            if (node.is_invisible()) continue;
+            node.batch_render(batch);
+        }
         batch.end();
     }
 
@@ -44,6 +56,9 @@ public class UIManager {
         Vector2 mouse_screen = new Vector2(mouse_world3.x, -mouse_world3.y);
 
         for (Control node: nodes) {
+
+            // cant input to invisible nodes
+            if (node.is_invisible()) continue;
 
             Vector2 position = node.position();
             float width = node.get_width();
@@ -62,12 +77,17 @@ public class UIManager {
             if (node instanceof Clickable) {
                 Clickable clickable = (Clickable) node;
 
+                if (inside && input.left_just_pressed && captured_clickable == null) {
+                    captured_clickable = clickable;
+                    clickable.on_click();
+                }
 
-                if (inside && input.left_just_pressed) clickable.on_click();
-                if (clickable.is_holding() && input.left_just_released) clickable.on_release();
             }
+        }
 
-
+        if (input.left_just_released && captured_clickable != null) {
+            captured_clickable.on_release();
+            captured_clickable = null;
         }
     }
 }

@@ -99,16 +99,6 @@ public class PhysicsWorld {
         }
     }
 
-    public static void debug(RigidBody body) {
-        Vector2[] verts = body.get_polygon().vertices();
-        System.out.print("P_a = ");
-        for (int i=0; i<verts.length; i++) {
-            System.out.print(verts[i].toString());
-            if (i!=verts.length-1) System.out.print(",");
-        }
-        System.out.println();
-    }
-
     public void add_body(RigidBody body) {
         if (body == null) return;
         bodies.add(body);

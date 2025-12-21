@@ -1,4 +1,4 @@
-package io.github.neaproject.UI;
+package io.github.neaproject.UI.interfaces;
 
 public interface Hoverable {
     void on_hover();

@@ -1,4 +1,4 @@
-package io.github.neaproject.UI;
+package io.github.neaproject.UI.elements;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -20,6 +20,7 @@ public abstract class Control {
     protected Control parent;
     protected List<Control> children;
     protected float width, height;
+    protected boolean show;
 
     public Control(Vector2 viewport_position, float width, float height) {
         this.viewport_position = viewport_position;
@@ -27,6 +28,7 @@ public abstract class Control {
         this.height = height;
         this.children = new ArrayList<>(0);
         parent = null;
+        show = true;
     }
 
     public Control(Vector2 viewport_position, float width, float height, Control parent) {
@@ -78,5 +80,17 @@ public abstract class Control {
 
     public void set_height(float height) {
         this.height = height;
+    }
+
+    public boolean is_invisible() {
+        return !show;
+    }
+
+    public void show() {
+        show = true;
+    }
+
+    public void hide() {
+        show = false;
     }
 }

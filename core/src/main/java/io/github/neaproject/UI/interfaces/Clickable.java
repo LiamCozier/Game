@@ -1,4 +1,4 @@
-package io.github.neaproject.UI;
+package io.github.neaproject.UI.interfaces;
 
 public interface Clickable {
     void on_click();
