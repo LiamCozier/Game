@@ -1,7 +1,6 @@
 package io.github.neaproject.scene;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -35,6 +34,7 @@ public class MainMenuScene extends Scene {
 
         Panel root_panel = new Panel(new Vector2(0,0), 600, 1080, new Color(0.1f, 0.1f, 0.1f, 0.6f));
         Button button1 = new Button(new Vector2(30, 360), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
+        button1.set_release_action(() -> manager.set_scene(new TestScene(manager)));
         Button button2 = new Button(new Vector2(30, 540), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
         Button button3 = new Button(new Vector2(30, 720), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
         Button exit_button = new Button(new Vector2(30, 900), 540, 150, Color.DARK_GRAY.cpy(), root_panel);

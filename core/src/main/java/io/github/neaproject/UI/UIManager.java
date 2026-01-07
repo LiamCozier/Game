@@ -81,7 +81,6 @@ public class UIManager {
                     captured_clickable = clickable;
                     clickable.on_click();
                 }
-
             }
         }
 
