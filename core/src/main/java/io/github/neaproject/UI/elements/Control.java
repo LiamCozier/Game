@@ -21,6 +21,7 @@ public abstract class Control {
     protected List<Control> children;
     protected float width, height;
     protected boolean show;
+    protected int z_order;
 
     public Control(Vector2 viewport_position, float width, float height) {
         this.viewport_position = viewport_position;
@@ -29,12 +30,14 @@ public abstract class Control {
         this.children = new ArrayList<>(0);
         parent = null;
         show = true;
+        z_order = 0;
     }
 
     public Control(Vector2 viewport_position, float width, float height, Control parent) {
         this(viewport_position, width, height);
         this.parent = parent;
         parent.add_child(this);
+        this.z_order = parent.z_order+1;
     }
 
     public abstract void shape_render(ShapeRenderer sr);
@@ -93,4 +96,9 @@ public abstract class Control {
     public void hide() {
         show = false;
     }
+
+    public int get_z() {return this.z_order;}
+
+    public void set_z(int z_order) {this.z_order = z_order;}
+
 }

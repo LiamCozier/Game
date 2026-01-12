@@ -7,10 +7,7 @@ import java.util.List;
 
 public class PhysicsWorld {
 
-    // How many times we iterate over all contacts per substep (sequential impulses)
     private static final int ITERATIONS = 16;
-
-    // How many substeps per frame (stability for stacks / fast motion)
     private static final int SUBSTEPS = 16;
 
     private final List<RigidBody> bodies;

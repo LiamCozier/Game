@@ -13,7 +13,6 @@ import com.badlogic.gdx.utils.Align;
 
 public class TextBox extends Control{
 
-    String text;
     BitmapFont font;
     GlyphLayout layout = new GlyphLayout();
 
@@ -39,6 +38,10 @@ public class TextBox extends Control{
         this(position, width, height, text, color, scale);
         this.parent = parent;
         parent.add_child(this);
+    }
+
+    public void set_text(String text) {
+        layout.setText(font, text, Color.WHITE, width, Align.center, true);
     }
 
     @Override

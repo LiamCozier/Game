@@ -9,9 +9,9 @@ import io.github.neaproject.UI.interfaces.Hoverable;
 
 public class Button extends Control implements Hoverable, Clickable {
 
-    Color color, off_color, on_color;
-    boolean hovering, pressing;
-    Runnable click_action, release_action;
+    protected Color color, off_color, on_color;
+    protected boolean hovering, pressing;
+    protected Runnable click_action, release_action;
 
     public Button(Vector2 position, float width, float height, Color color) {
         super(position, width, height);

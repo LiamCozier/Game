@@ -17,20 +17,24 @@ import java.util.List;
 public class UIManager {
 
     List<Control> nodes;
+    boolean nodes_dirty;
 
     Clickable captured_clickable;
 
     public UIManager() {
         nodes = new ArrayList<>(0);
+        nodes_dirty = true;
         captured_clickable = null;
     }
 
     public void add_node(Control node) {
+        nodes_dirty = true;
         nodes.add(node);
         for (Control child: node.get_children()) add_node(child);
     }
 
     public void add_node(Control node, boolean add_children) {
+        nodes_dirty = true;
         nodes.add(node);
         if (add_children) nodes.addAll(node.get_children());
     }

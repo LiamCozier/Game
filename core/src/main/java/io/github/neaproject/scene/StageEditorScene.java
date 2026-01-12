@@ -9,14 +9,17 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.neaproject.UI.UIManager;
-import io.github.neaproject.UI.elements.*;
+import io.github.neaproject.UI.elements.Button;
+import io.github.neaproject.UI.elements.Panel;
+import io.github.neaproject.UI.elements.Switch;
 import io.github.neaproject.input.UIInputProcessor;
+import io.github.neaproject.physics.PhysicsWorld;
+import io.github.neaproject.physics.RigidBody;
+import io.github.neaproject.physics.shape.BoxShape;
 
-public class MainMenuScene extends Scene {
+public class StageEditorScene extends Scene{
 
-    public MainMenuScene(SceneManager manager) {
-        super(manager);
-    }
+    public StageEditorScene(SceneManager manager) {super(manager);}
 
     OrthographicCamera camera;
     OrthographicCamera ui_camera;
@@ -27,29 +30,21 @@ public class MainMenuScene extends Scene {
     ShapeRenderer sr;
     SpriteBatch batch;
 
-
+    // physics
+    PhysicsWorld physics_world;
 
     private void init_ui() {
         ui_manager = new UIManager();
 
-        Panel root_panel = new Panel(new Vector2(0,0), 600, 1080, new Color(0.1f, 0.1f, 0.1f, 0.6f));
+        Panel sidebar = new Panel(new Vector2(-85,115), 85, 850, new Color(0.2f, 0.2f, 0.2f, 1f));
+        Switch sidebar_switch = new Switch(new Vector2(85,375), 25, 100, new Color(0.2f, 0.2f, 0.2f, 1f), 2, sidebar);
+        sidebar_switch.set_state_action(0, () -> sidebar.translate(new Vector2(85, 0)));
+        sidebar_switch.set_state_action(1, () -> sidebar.translate(new Vector2(-85, 0)));
 
-        Button load_button = new Button(new Vector2(30, 360), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
-        new TextBox(new Vector2(0,0), 540, 150, "Load Stage", Color.WHITE, 0.2f, load_button);
-        load_button.set_release_action(() -> manager.set_scene(new TestScene(manager)));
+        // sidebar buttons
+        Button tool_button = new Button(new Vector2(8, 8f), 64, 64, new Color(0.4f, 0.4f, 0.4f, 1), sidebar);
 
-        Button edit_button = new Button(new Vector2(30, 540), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
-        new TextBox(new Vector2(0,0), 540, 150, "Edit Stage", Color.WHITE, 0.2f, edit_button);
-        edit_button.set_release_action(() -> manager.set_scene(new StageEditorScene(manager)));
-
-        Button settings_button = new Button(new Vector2(30, 720), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
-        new TextBox(new Vector2(0,0), 540, 150, "Settings", Color.WHITE, 0.2f, settings_button);
-
-        Button exit_button = new Button(new Vector2(30, 900), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
-        new TextBox(new Vector2(0,0), 540, 150, "Exit to desktop", Color.WHITE, 0.2f, exit_button);
-        exit_button.set_release_action(() -> Gdx.app.exit());
-
-        ui_manager.add_node(root_panel);
+        ui_manager.add_node(sidebar);
     }
 
     @Override
@@ -75,17 +70,34 @@ public class MainMenuScene extends Scene {
         sr = new ShapeRenderer();
         batch = new SpriteBatch();
 
+        physics_world = new PhysicsWorld();
+
+        physics_world.add_body(new RigidBody(
+            new Vector2(0, 0),
+            new Vector2(0, 25),
+            new BoxShape(2, 2),
+            0, 3.14f,
+            1, true
+        ));
+
+        physics_world.add_body(new RigidBody(
+            new Vector2(0, -5),
+            new Vector2(0, 0),
+            new BoxShape(5, 1),
+            0, 0,
+            0, true
+        ));
     }
 
     @Override
     public void update(float dt) {
         ui_input.begin_frame();
         ui_manager.take_input(ui_input, ui_camera);
+        physics_world.physics_tick(dt);
     }
 
     @Override
     public void render() {
-
         // enable alpha channel
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -95,12 +107,18 @@ public class MainMenuScene extends Scene {
         sr.setProjectionMatrix(ui_camera.combined);
         batch.setProjectionMatrix(ui_camera.combined);
 
-        sr.begin(ShapeRenderer.ShapeType.Filled);
-        sr.setColor(Color.BLUE);
-        sr.rect(0, -1080, 1920, 120);
+        ui_manager.render_all(sr, batch);
+
+        sr.setProjectionMatrix(camera.combined);
+        batch.setProjectionMatrix(camera.combined);
+
+        sr.begin(ShapeRenderer.ShapeType.Line);
+        sr.setColor(Color.WHITE);
+        for (RigidBody body: physics_world.get_bodies()) {
+            sr.polygon(body.get_polygon().get_float_array());
+        }
         sr.end();
 
-        ui_manager.render_all(sr, batch);
     }
 
     @Override

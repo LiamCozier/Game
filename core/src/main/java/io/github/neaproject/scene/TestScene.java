@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Vector2;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.ShortArray;
 import io.github.neaproject.UI.elements.Control;
 import io.github.neaproject.UI.elements.Panel;
+import io.github.neaproject.UI.elements.TextBox;
 import io.github.neaproject.input.CameraInputProcessor;
 import io.github.neaproject.physics.PhysicsWorld;
 import io.github.neaproject.physics.RigidBody;
@@ -27,6 +29,7 @@ import java.util.List;
 public class TestScene extends Scene{
 
     OrthographicCamera camera;
+    OrthographicCamera ui_camera;
     CameraInputProcessor cam_input;
     InputToolbox toolbox;
     BoxCreationTool boxTool;
@@ -39,7 +42,8 @@ public class TestScene extends Scene{
     BoxDeletionTool DELETE_BOX;
     int current_tool = 0;
 
-    Panel panel;
+    SpriteBatch batch;
+    TextBox text;
 
     public TestScene(SceneManager manager) {
         super(manager);
@@ -52,6 +56,14 @@ public class TestScene extends Scene{
         float ppu = Gdx.graphics.getHeight() / height;
         float width = Gdx.graphics.getWidth() / ppu;
         camera = new OrthographicCamera(width, height);
+
+        // ui camera
+        float ui_height = 1080;
+        float ui_ppu = Gdx.graphics.getHeight() / ui_height;
+        float ui_width = Gdx.graphics.getWidth() / ui_ppu;
+        ui_camera = new OrthographicCamera(ui_width, ui_height);
+        ui_camera.translate(new Vector2(ui_width, -ui_height).scl(0.5f));
+        ui_camera.update();
 
         cam_input = new CameraInputProcessor();
         Gdx.input.setInputProcessor(cam_input);
@@ -69,7 +81,8 @@ public class TestScene extends Scene{
         CREATE_BOX = new BoxCreationTool(camera, world);
         DELETE_BOX = new BoxDeletionTool(camera, world);
 
-        panel = new Panel(new Vector2(0, 15), 5, 5, Control.DARK_GREY.cpy());
+        batch = new SpriteBatch();
+        text = new TextBox(new Vector2(0,0), 150, 50, "text", Color.WHITE, 0.2f);
     }
 
     @Override
@@ -85,15 +98,21 @@ public class TestScene extends Scene{
         ScreenUtils.clear(0f, 0f, 0f, 1);
 
         sr.setProjectionMatrix(camera.combined);
-        sr.begin(ShapeRenderer.ShapeType.Line);
+        sr.begin(ShapeRenderer.ShapeType.Filled);
         sr.setColor(Color.WHITE);
         RigidBody[] bodies = world.get_bodies();
         for (RigidBody body: bodies) {
             draw_filled_polygon(sr, body.get_polygon().get_float_array(), Color.WHITE);
         }
         toolbox.render(sr);
-        panel.shape_render(sr);
         sr.end();
+
+        text.set_text((Math.round(1f / Gdx.graphics.getDeltaTime())) + "fps");
+
+        batch.setProjectionMatrix(ui_camera.combined);
+        batch.begin();
+        text.batch_render(batch);
+        batch.end();
     }
 
     public void draw_filled_polygon(ShapeRenderer sr, float[] verts, Color color) {
@@ -119,14 +138,12 @@ public class TestScene extends Scene{
 
         // pan camera
         if (cam_input.middle_pressed) {
-            // move by (-x, y) delta because you 'drag' against the delta
-            // (positive Y because screen space is defined Y-down but world is Y-up)
             Vector2 camera_delta = new Vector2(-cam_input.delta.x, cam_input.delta.y).scl(camera.zoom);
 
             // prevent drift from no mouse movement
             cam_input.delta.set(0,0);
 
-            float inv_ppu = (float) camera.viewportHeight / Gdx.graphics.getHeight();
+            float inv_ppu = camera.viewportHeight / Gdx.graphics.getHeight();
             camera_delta.scl(inv_ppu);
 
             camera.translate(camera_delta.x, camera_delta.y);
@@ -140,8 +157,8 @@ public class TestScene extends Scene{
             Vector3 mouse_before = camera.unproject(new Vector3(cam_input.mouse_screen.x, cam_input.mouse_screen.y, 0));
 
             // zoom
-            float zoomFactor = (float) Math.pow(1.1f, cam_input.scroll_amount);
-            camera.zoom *= zoomFactor;
+            float zoom_factor = (float) Math.pow(1.1f, cam_input.scroll_amount);
+            camera.zoom *= zoom_factor;
             camera.update();
 
             Vector3 mouse_after = camera.unproject(
