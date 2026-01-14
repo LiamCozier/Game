@@ -1,10 +1,26 @@
 package io.github.neaproject.input;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.math.Vector2;
 
 public class EditorInputProcessor implements InputProcessor {
+
+    public Vector2 mouse_position = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+    public Vector2 prev_mouse_position = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+    public Vector2 mouse_delta = new Vector2(0, 0);
+
+    public boolean left_pressed = false;
+    public boolean left_just_pressed = false;
+    public boolean left_just_released = false;
+    public boolean left_pressed_prev = false;
+
     @Override
     public boolean keyDown(int keycode) {
+        if (keycode == Input.Keys.ESCAPE) {
+            Gdx.app.exit();
+        }
         return false;
     }
 
@@ -20,11 +36,19 @@ public class EditorInputProcessor implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (button == Input.Buttons.LEFT) {
+            left_pressed = true;
+            left_just_pressed = true;
+        }
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (button == Input.Buttons.LEFT){
+            left_pressed = false;
+            left_just_released = true;
+        }
         return false;
     }
 
@@ -40,11 +64,24 @@ public class EditorInputProcessor implements InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        mouse_position.set(screenX, screenY);
         return false;
     }
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
+    }
+
+    public void begin_frame() {
+
+        // resets at start of each frame so that the input only lasts for one
+        left_just_pressed  = left_pressed && !left_pressed_prev;
+        left_just_released = !left_pressed && left_pressed_prev;
+        left_pressed_prev = left_pressed;
+
+
+        mouse_delta.set(mouse_position.cpy().sub(prev_mouse_position));
+        prev_mouse_position.set(mouse_position);
     }
 }

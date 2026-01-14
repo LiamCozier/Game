@@ -14,6 +14,7 @@ import io.github.neaproject.UI.UIManager;
 import io.github.neaproject.UI.elements.Button;
 import io.github.neaproject.UI.elements.Panel;
 import io.github.neaproject.UI.elements.Switch;
+import io.github.neaproject.editor.tools.EditorToolbox;
 import io.github.neaproject.input.EditorInputProcessor;
 import io.github.neaproject.input.UIInputProcessor;
 import io.github.neaproject.physics.PhysicsWorld;
@@ -36,6 +37,8 @@ public class StageEditorScene extends Scene{
 
     ShapeRenderer sr;
     SpriteBatch batch;
+
+    EditorToolbox toolbox;
 
     // physics
     Stage stage;
@@ -78,20 +81,28 @@ public class StageEditorScene extends Scene{
         multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(ui_input);
         multiplexer.addProcessor(editor_input);
+        Gdx.input.setInputProcessor(multiplexer);
 
-        Gdx.input.setInputProcessor(ui_input);
 
         sr = new ShapeRenderer();
         batch = new SpriteBatch();
 
         stage = new Stage();
+
+        toolbox = new EditorToolbox(stage, editor_input, camera);
+        toolbox.set_tool(1);
     }
 
     @Override
     public void update(float dt) {
+
         ui_input.begin_frame();
+        editor_input.begin_frame();
+
         ui_manager.tick(dt);
         ui_manager.take_input(ui_input, ui_camera);
+
+        if (!ui_manager.input_captured) toolbox.update();
 
         stage.tick(dt);
 

@@ -20,11 +20,13 @@ public class UIManager {
     boolean nodes_dirty;
 
     Clickable captured_clickable;
+    public boolean input_captured;
 
     public UIManager() {
         nodes = new ArrayList<>(0);
         nodes_dirty = true;
         captured_clickable = null;
+        input_captured = false;
     }
 
     private void sort_nodes() {
@@ -80,6 +82,7 @@ public class UIManager {
 
     public void take_input(UIInputProcessor input, Camera camera) {
         if (nodes_dirty) sort_nodes();
+        input_captured = false;
 
         Vector3 mouse_world3 = camera.unproject(new Vector3(input.mouse_position.x, input.mouse_position.y, 0));
         Vector2 mouse_screen = new Vector2(mouse_world3.x, -mouse_world3.y);
@@ -95,6 +98,7 @@ public class UIManager {
 
             boolean inside = mouse_screen.x >= position.x && mouse_screen.x <= position.x + width &&
                 mouse_screen.y >= position.y && mouse_screen.y <= position.y + height;
+            if (inside) input_captured = true;
 
             if (node instanceof Hoverable) {
                 Hoverable hoverable = (Hoverable) node;

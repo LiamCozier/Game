@@ -8,7 +8,7 @@ import io.github.neaproject.physics.shape.BoxShape;
 
 public class Stage {
 
-    PhysicsWorld physics_world;
+    private final PhysicsWorld physics_world;
 
     public Stage() {
         physics_world = new PhysicsWorld();
@@ -47,6 +47,10 @@ public class Stage {
             sr.polygon(body.get_polygon().get_float_array());
         }
         sr.end();
+    }
+
+    public void add_body(RigidBody body) {
+        physics_world.add_body(body);
     }
 
 }
