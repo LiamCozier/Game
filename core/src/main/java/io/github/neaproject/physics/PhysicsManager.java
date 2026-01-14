@@ -289,7 +289,7 @@ public class PhysicsManager {
         return new Vector2[]{sp};
     }
 
-    public static void resolve_collision(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
+    public static void resolve_velocity(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
 
         // if both bodies are static, do nothing
         if (body_a.inv_mass + body_b.inv_mass == 0f) {
@@ -304,7 +304,6 @@ public class PhysicsManager {
         }
 
 
-
         Vector2 normal = manifold.collision_normal.cpy();
         if (normal.len2() == 0f) return;
         normal.nor();
@@ -312,7 +311,7 @@ public class PhysicsManager {
         int contact_count = manifold.contact_points.length;
 
         // combine material properties
-        float restitution = Math.min(body_a.restitution, body_b.restitution);
+        float restitution = Math.max(body_a.restitution, body_b.restitution);
 
         float static_friction = (float) Math.sqrt(
             body_a.static_friction * body_a.static_friction +
@@ -352,6 +351,7 @@ public class PhysicsManager {
 
             Vector2 relative_velocity = velocity_b_at_contact.cpy().sub(velocity_a_at_contact);
 
+
             // relative velocity along normal
             float contact_velocity_normal = relative_velocity.dot(normal);
             // if separating along normal, no impulse
@@ -378,7 +378,6 @@ public class PhysicsManager {
             // normal impulse
             float normal_impulse_scalar = -(1f + restitution) * contact_velocity_normal;
             normal_impulse_scalar /= inv_mass_sum;
-            normal_impulse_scalar /= contact_count; // split across contacts
 
             Vector2 normal_impulse = normal.cpy().scl(normal_impulse_scalar);
 
@@ -439,7 +438,6 @@ public class PhysicsManager {
             // base friction impulse magnitude
             float tangent_impulse_scalar = -contact_velocity_tangent;
             tangent_impulse_scalar /= inv_mass_sum_tangent;
-            tangent_impulse_scalar /= contact_count;
 
             // correct static-friction clamp: use |Jn|
             float max_static_friction_impulse = Math.abs(normal_impulse_scalar) * static_friction;
@@ -467,10 +465,17 @@ public class PhysicsManager {
             manifold.tangent_impulses[i] = tangent_impulse_scalar;
         }
 
-        // positional correction
-        float slop = 0.01f;
-        float percent = 0.1f;
-        float max_correction = 0.01f;
+    }
+
+    public static void resolve_position(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
+
+        final float slop = 0.001f;
+        final float percent = 0.2f;
+        final float max_correction = 0.4f;
+
+        Vector2 normal = manifold.collision_normal.cpy();
+        if (normal.len2() == 0f) return;
+        normal.nor();
 
         float penetration = manifold.minimum_penetration_depth;
         float correction_mag = Math.max(penetration - slop, 0f);

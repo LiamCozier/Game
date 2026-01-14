@@ -7,22 +7,20 @@ import java.util.List;
 
 public class PhysicsWorld {
 
-    private static final int ITERATIONS = 16;
+    private static final int VELOCITY_ITERATIONS = 16;
+    private static final int POSITIONAL_ITERATIONS = 4;
     private static final int SUBSTEPS = 16;
 
     private final List<RigidBody> bodies;
     private final List<Contact> contacts;
 
-    // Internal helper to store a pair + its manifold
     private static class Contact {
         final RigidBody body_a;
         final RigidBody body_b;
-        final CollisionManifold manifold;
 
-        Contact(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
+        Contact(RigidBody body_a, RigidBody body_b) {
             this.body_a = body_a;
             this.body_b = body_b;
-            this.manifold = manifold;
         }
     }
 
@@ -63,34 +61,41 @@ public class PhysicsWorld {
                     if (!PhysicsManager.aabb_overlap(
                         body_a.get_bounding_box(),
                         body_b.get_bounding_box()
-                    )) {
-                        continue;
-                    }
+                    )) continue;
 
-                    // SAT narrow-phase
-                    CollisionManifold manifold = PhysicsManager.sat_overlap(body_a.get_polygon(), body_b.get_polygon());
+                    CollisionManifold manifold = PhysicsManager.sat_overlap(
+                        body_a.get_polygon(), body_b.get_polygon()
+                    );
+                    if (manifold.minimum_penetration_depth < 1e-4f) continue;
 
-
-                    if (manifold == null ||
-                        manifold.collision_normal == null ||
-                        manifold.contact_points == null ||
-                        manifold.contact_points.length == 0 ||
-                        manifold.minimum_penetration_depth < 1e-4f) {
-                        continue;
-                    }
-
-                    contacts.add(new Contact(body_a, body_b, manifold));
+                    contacts.add(new Contact(body_a, body_b));
                 }
             }
 
             int contact_count = contacts.size();
             if (contact_count == 0) continue;
 
-            // solve contacts
-            for (int iter = 0; iter < ITERATIONS; iter++) {
-                for (int k = 0; k < contact_count; k++) {
-                    Contact c = contacts.get(k);
-                    PhysicsManager.resolve_collision(c.body_a, c.body_b, c.manifold);
+            for (int iter = 0; iter < VELOCITY_ITERATIONS; iter++) {
+                for (Contact c : contacts) {
+
+                    CollisionManifold manifold = PhysicsManager.sat_overlap(
+                        c.body_a.get_polygon(), c.body_b.get_polygon()
+                    );
+                    if (manifold.minimum_penetration_depth < 1e-4f) continue;
+
+                    PhysicsManager.resolve_velocity(c.body_a, c.body_b, manifold);
+                }
+            }
+
+            for (int iter = 0; iter < POSITIONAL_ITERATIONS; iter++) {
+                for (Contact c: contacts) {
+
+                    CollisionManifold manifold = PhysicsManager.sat_overlap(
+                        c.body_a.get_polygon(), c.body_b.get_polygon()
+                    );
+                    if (manifold.minimum_penetration_depth < 1e-4f) continue;
+
+                    PhysicsManager.resolve_position(c.body_a, c.body_b, manifold);
                 }
             }
         }

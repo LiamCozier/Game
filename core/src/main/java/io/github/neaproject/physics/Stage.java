@@ -20,18 +20,18 @@ public class Stage {
 
         physics_world.add_body(new RigidBody(
             new Vector2(0, 0),
-            new Vector2(0, 25),
+            new Vector2(0, 0),
             new BoxShape(2, 2),
             0, 3.14f,
-            1, true
+            10, false
         ));
 
         physics_world.add_body(new RigidBody(
             new Vector2(0, -5),
             new Vector2(0, 0),
-            new BoxShape(5, 1),
+            new BoxShape(50, 1),
             0, 0,
-            0, true
+            0, false
         ));
     }
 

@@ -1,10 +1,13 @@
 package io.github.neaproject.editor.tools;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import io.github.neaproject.physics.RigidBody;
 import io.github.neaproject.physics.Stage;
 import io.github.neaproject.physics.shape.BoxShape;
+
+import java.util.Random;
 
 
 public class CreateBodyTool extends EditorTool {
@@ -14,13 +17,15 @@ public class CreateBodyTool extends EditorTool {
 
     @Override
     public void on_click(int button, Vector2 world_position) {
-        stage.add_body(new RigidBody(
+        RigidBody b = new RigidBody(
             world_position,
             new Vector2(0, 0),
             new BoxShape(1, 1),
             0, 0,
             1, true
-        ));
+        );
+
+        stage.add_body(b);
     }
 
     @Override

@@ -22,7 +22,7 @@ import io.github.neaproject.physics.RigidBody;
 import io.github.neaproject.physics.Stage;
 import io.github.neaproject.physics.shape.BoxShape;
 
-public class StageEditorScene extends Scene{
+public class StageEditorScene extends Scene {
 
     public StageEditorScene(SceneManager manager) {super(manager);}
 
