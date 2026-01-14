@@ -38,6 +38,7 @@ public class TextBox extends Control{
         this(position, width, height, text, color, scale);
         this.parent = parent;
         parent.add_child(this);
+        this.z_order = parent.z_order+1;
     }
 
     public void set_text(String text) {

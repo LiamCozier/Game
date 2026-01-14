@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import io.github.neaproject.UI.UIAnimator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public abstract class Control {
     protected float width, height;
     protected boolean show;
     protected int z_order;
+    public UIAnimator animator;
 
     public Control(Vector2 viewport_position, float width, float height) {
         this.viewport_position = viewport_position;
@@ -30,14 +32,15 @@ public abstract class Control {
         this.children = new ArrayList<>(0);
         parent = null;
         show = true;
-        z_order = 0;
+        z_order = 1;
+        animator = new UIAnimator(this);
     }
 
     public Control(Vector2 viewport_position, float width, float height, Control parent) {
         this(viewport_position, width, height);
         this.parent = parent;
         parent.add_child(this);
-        this.z_order = parent.z_order+1;
+        this.z_order = parent.z_order + 1;
     }
 
     public abstract void shape_render(ShapeRenderer sr);
@@ -100,5 +103,6 @@ public abstract class Control {
     public int get_z() {return this.z_order;}
 
     public void set_z(int z_order) {this.z_order = z_order;}
+
 
 }

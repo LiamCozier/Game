@@ -3,7 +3,7 @@ package io.github.neaproject.UI.elements;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
-public class Switch extends Button{
+public class Switch extends Button {
 
     private int states;
     private int current_state;
@@ -23,6 +23,7 @@ public class Switch extends Button{
         this(position, width, height, color, states);
         this.parent = parent;
         parent.add_child(this);
+        this.z_order = parent.z_order+1;
     }
 
     private void run_current_state() {

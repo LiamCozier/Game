@@ -27,6 +27,22 @@ public class UIManager {
         captured_clickable = null;
     }
 
+    private void sort_nodes() {
+        nodes_dirty = false;
+
+        for (int i = 1; i < nodes.size(); i++) {
+            Control key = nodes.get(i);
+            int key_z = key.get_z();
+
+            int j = i - 1;
+            while (j >= 0 && nodes.get(j).get_z() > key_z) {
+                nodes.set(j + 1, nodes.get(j));
+                j--;
+            }
+            nodes.set(j + 1, key);
+        }
+    }
+
     public void add_node(Control node) {
         nodes_dirty = true;
         nodes.add(node);
@@ -40,6 +56,8 @@ public class UIManager {
     }
 
     public void render_all(ShapeRenderer sr, SpriteBatch batch) {
+        if (nodes_dirty) sort_nodes();
+
         sr.begin(ShapeRenderer.ShapeType.Filled);
         for (Control node: nodes) {
             if (node.is_invisible()) continue;
@@ -55,7 +73,14 @@ public class UIManager {
         batch.end();
     }
 
+    public void tick(float dt) {
+        if (nodes_dirty) sort_nodes();
+        for (Control node: nodes) node.animator.tick(dt);
+    }
+
     public void take_input(UIInputProcessor input, Camera camera) {
+        if (nodes_dirty) sort_nodes();
+
         Vector3 mouse_world3 = camera.unproject(new Vector3(input.mouse_position.x, input.mouse_position.y, 0));
         Vector2 mouse_screen = new Vector2(mouse_world3.x, -mouse_world3.y);
 
@@ -86,6 +111,7 @@ public class UIManager {
                     clickable.on_click();
                 }
             }
+
         }
 
         if (input.left_just_released && captured_clickable != null) {

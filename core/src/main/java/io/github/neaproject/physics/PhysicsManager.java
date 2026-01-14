@@ -199,7 +199,7 @@ public class PhysicsManager {
         Vector2[] vertices = polygon.vertices();
         int vertex_count = vertices.length;
 
-        // 1. Find support vertex (furthest along collision_normal)
+        // find support vertex
         int support_index = 0;
         float max_projection = -Float.MAX_VALUE;
 
@@ -213,16 +213,12 @@ public class PhysicsManager {
 
         Vector2 support_vertex = vertices[support_index];
 
-        // 2. Look at the two edges touching the support vertex
         int prev_index = (support_index - 1 + vertex_count) % vertex_count;
         int next_index = (support_index + 1) % vertex_count;
 
-        // edge from prev -> support
         Vector2 prev_edge = support_vertex.cpy().sub(vertices[prev_index]);
-        // edge from support -> next
         Vector2 next_edge = vertices[next_index].cpy().sub(support_vertex);
 
-        // normal convention: CCW edge → (-ey, ex)
         Vector2 prev_normal = new Vector2(-prev_edge.y, prev_edge.x);
         Vector2 next_normal = new Vector2(-next_edge.y, next_edge.x);
 
@@ -237,7 +233,7 @@ public class PhysicsManager {
         Vector2 edge_direction;
         Vector2 edge_normal;
 
-        // Choose the edge whose normal is more aligned with collision_normal
+        // choose the edge whose normal is more aligned with collision_normal
         if (prev_dot > next_dot) {
             edge_start_index = prev_index;
             edge_end_index = support_index;
@@ -461,7 +457,7 @@ public class PhysicsManager {
             body_a.velocity.sub(friction_impulse.cpy().scl(body_a.inv_mass));
             body_b.velocity.add(friction_impulse.cpy().scl(body_b.inv_mass));
 
-            // apply friction impulse to angular velocity (same sign pattern as normal)
+            // apply friction impulse to angular velocity
             float ra_cross_jt = ra.x * friction_impulse.y - ra.y * friction_impulse.x;
             float rb_cross_jt = rb.x * friction_impulse.y - rb.y * friction_impulse.x;
 
@@ -474,7 +470,7 @@ public class PhysicsManager {
         // positional correction
         float slop = 0.01f;
         float percent = 0.1f;
-        float max_correction = 0.1f;
+        float max_correction = 0.01f;
 
         float penetration = manifold.minimum_penetration_depth;
         float correction_mag = Math.max(penetration - slop, 0f);

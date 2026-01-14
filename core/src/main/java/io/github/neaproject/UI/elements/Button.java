@@ -24,6 +24,7 @@ public class Button extends Control implements Hoverable, Clickable {
         this(position, width, height, color);
         this.parent = parent;
         parent.add_child(this);
+        this.z_order = parent.z_order+1;
     }
 
     @Override
