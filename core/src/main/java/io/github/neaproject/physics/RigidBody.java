@@ -7,6 +7,7 @@ public class RigidBody extends Particle {
     private Shape shape;
     public float orientation;
     public float angular_velocity;
+    public boolean sleeping;
     public final float mass;
     public final float inv_mass;
     public final float inertia;
@@ -27,6 +28,8 @@ public class RigidBody extends Particle {
         this.restitution = 0.4f;
         this.static_friction = 0.8f;
         this.dynamic_friction = 0.5f;
+
+        this.sleeping = false;
 
         BoundingBox bounding_box = this.shape.get_bounding_box(position);
         float width = bounding_box.get_width();

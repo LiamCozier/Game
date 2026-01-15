@@ -6,7 +6,13 @@ import io.github.neaproject.physics.RigidBody;
 import io.github.neaproject.physics.Stage;
 
 public class SelectBodyTool extends EditorTool {
-    public SelectBodyTool(Stage stage) {super(stage);}
+
+    RigidBody dragging_body;
+
+    public SelectBodyTool(Stage stage) {
+        super(stage);
+        dragging_body = null;
+    }
 
     @Override
     public void on_click(int button, Vector2 world_position) {
@@ -25,7 +31,21 @@ public class SelectBodyTool extends EditorTool {
         RigidBody body = stage.get_overlapping_body(world_position);
         if (body == null) return;
 
+        if (dragging_body == null) {
+            dragging_body = body;
+        }
+
+        body.sleeping = true;
         body.position.add(mouse_delta);
     }
+
+    @Override
+    public void on_release(int button, Vector2 world_position) {
+        if (dragging_body != null) {
+            dragging_body.sleeping = false;
+            dragging_body = null;
+        }
+    }
+
 
 }

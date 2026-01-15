@@ -42,6 +42,7 @@ public class PhysicsWorld {
             // ---- 1) INTEGRATE (always integrate all dynamic bodies) ----
             for (RigidBody body : bodies) {
                 if (body.inv_mass == 0f) continue; // static → no integration
+                if (body.sleeping) continue;
                 body.physics_tick(sub_dt);
             }
 
@@ -50,9 +51,11 @@ public class PhysicsWorld {
 
             for (int i = 0; i < body_count; i++) {
                 RigidBody body_a = bodies.get(i);
+                if (body_a.sleeping) continue;
 
                 for (int j = i + 1; j < body_count; j++) {
                     RigidBody body_b = bodies.get(j);
+                    if (body_b.sleeping) continue;
 
                     // both static → ignore
                     if (body_a.inv_mass + body_b.inv_mass == 0f) continue;
