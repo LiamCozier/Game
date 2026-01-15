@@ -52,7 +52,10 @@ public class StageEditorScene extends Scene {
         sidebar_switch.set_state_action(1, () -> sidebar.animator.translate(UIAnimator.EasingType.ExponentialOut, new Vector2(-80, 0), 0.5f));
 
         // sidebar buttons
-        Button tool_button = new Button(new Vector2(8, 8f), 64, 64, new Color(0.4f, 0.4f, 0.4f, 1), sidebar);
+        Button create_tool_button = new Button(new Vector2(8, 8f), 64, 64, new Color(0.4f, 0.4f, 0.4f, 1), sidebar);
+        create_tool_button.set_release_action(() -> toolbox.set_tool(EditorToolbox.CREATE_BODY));
+        Button select_tool_button = new Button(new Vector2(8, 80f), 64, 64, new Color(0.4f, 0.4f, 0.4f, 1), sidebar);
+        select_tool_button.set_release_action(() -> toolbox.set_tool(EditorToolbox.SELECT_BODY));
 
 
         ui_manager.add_node(sidebar);
@@ -116,15 +119,13 @@ public class StageEditorScene extends Scene {
 
         ScreenUtils.clear(0f, 0f, 0f, 1f);
 
-        sr.setProjectionMatrix(ui_camera.combined);
-        batch.setProjectionMatrix(ui_camera.combined);
-
-        ui_manager.render_all(sr, batch);
-
         sr.setProjectionMatrix(camera.combined);
         batch.setProjectionMatrix(camera.combined);
-
         stage.render(sr, batch);
+
+        sr.setProjectionMatrix(ui_camera.combined);
+        batch.setProjectionMatrix(ui_camera.combined);
+        ui_manager.render_all(sr, batch);
 
     }
 

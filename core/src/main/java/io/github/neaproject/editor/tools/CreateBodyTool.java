@@ -32,6 +32,5 @@ public class CreateBodyTool extends EditorTool {
     public void on_move(Vector2 world_position) {}
 
     @Override
-    public void on_drag(int button, Vector2 mouse_delta) {}
-
+    public void on_drag(int button, Vector2 world_position, Vector2 mouse_delta) {}
 }

@@ -12,7 +12,7 @@ public abstract class EditorTool {
 
     public abstract void on_click(int button, Vector2 world_position);
     public abstract void on_move(Vector2 world_position);
-    public abstract void on_drag(int button, Vector2 world_position);
+    public abstract void on_drag(int button, Vector2 world_position, Vector2 mouse_delta);
 
 
 }

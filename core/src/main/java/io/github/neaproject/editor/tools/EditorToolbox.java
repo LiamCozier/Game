@@ -9,39 +9,91 @@ import io.github.neaproject.physics.Stage;
 
 public class EditorToolbox {
 
-    Stage stage;
-    OrthographicCamera camera;
-    EditorInputProcessor input;
-    EditorTool current_tool;
-    CreateBodyTool create_body_tool;
+    public static final int CREATE_BODY = 1;
+    public static final int SELECT_BODY = 2;
+
+    private final CreateBodyTool CREATE_BODY_TOOL;
+    private final SelectBodyTool SELECT_BODY_TOOL;
+
+    private Stage stage;
+    private OrthographicCamera camera;
+    private EditorInputProcessor input;
+    private EditorTool current_tool;
 
     public EditorToolbox(Stage stage, EditorInputProcessor editor_input_processor, OrthographicCamera camera) {
         this.stage = stage;
         this.input = editor_input_processor;
         this.camera = camera;
 
+        CREATE_BODY_TOOL = new CreateBodyTool(stage);
+        SELECT_BODY_TOOL = new SelectBodyTool(stage);
+
         current_tool = null;
-        create_body_tool = new CreateBodyTool(stage);
     }
 
     public void update() {
         if (current_tool == null) return;
 
-        Vector3 tmp = camera.unproject(new Vector3(input.mouse_position.x, input.mouse_position.y, 0));
-        Vector2 world_position = new Vector2(tmp.x, tmp.y);
+        Vector3 screen_mouse = new Vector3(
+            input.mouse_position.x,
+            input.mouse_position.y,
+            0
+        );
 
-        if (input.left_just_pressed) current_tool.on_click(Input.Buttons.LEFT, world_position);
-        if (!input.mouse_delta.equals(Vector2.Zero)) {
-            if (input.left_pressed) current_tool.on_drag(Input.Buttons.LEFT, input.mouse_delta);
-            current_tool.on_move(world_position);
+        Vector3 world_mouse_3 = camera.unproject(screen_mouse);
+        Vector2 world_mouse_position = new Vector2(
+            world_mouse_3.x,
+            world_mouse_3.y
+        );
+
+        if (input.left_just_pressed) {
+            current_tool.on_click(
+                Input.Buttons.LEFT,
+                world_mouse_position
+            );
         }
 
+        if (input.mouse_delta.len2() != 0f) {
+
+            float current_screen_x = input.mouse_position.x;
+            float current_screen_y = input.mouse_position.y;
+
+            float previous_screen_x = current_screen_x - input.mouse_delta.x;
+            float previous_screen_y = current_screen_y - input.mouse_delta.y;
+
+            Vector3 previous_world_mouse_3 = camera.unproject(
+                new Vector3(previous_screen_x, previous_screen_y, 0)
+            );
+
+            Vector3 current_world_mouse_3 = camera.unproject(
+                new Vector3(current_screen_x, current_screen_y, 0)
+            );
+
+            Vector2 world_mouse_delta = new Vector2(
+                current_world_mouse_3.x - previous_world_mouse_3.x,
+                current_world_mouse_3.y - previous_world_mouse_3.y
+            );
+
+            if (input.left_pressed) {
+                current_tool.on_drag(
+                    Input.Buttons.LEFT,
+                    world_mouse_position,
+                    world_mouse_delta
+                );
+            }
+
+            current_tool.on_move(world_mouse_position);
+        }
     }
 
     public void set_tool(int tool) {
         switch (tool) {
             case 1:
-                this.current_tool = create_body_tool;
+                this.current_tool = CREATE_BODY_TOOL;
+                break;
+            case 2:
+                this.current_tool = SELECT_BODY_TOOL;
+                break;
         }
     }
 
