@@ -15,15 +15,13 @@ public class EditorToolbox {
     private final CreateBodyTool CREATE_BODY_TOOL;
     private final SelectBodyTool SELECT_BODY_TOOL;
 
-    private Stage stage;
-    private OrthographicCamera camera;
-    private EditorInputProcessor input;
+    private final OrthographicCamera camera;
+    private final EditorInputProcessor input;
     private EditorTool current_tool;
 
     private boolean dragging;
 
     public EditorToolbox(Stage stage, EditorInputProcessor editor_input_processor, OrthographicCamera camera) {
-        this.stage = stage;
         this.input = editor_input_processor;
         this.camera = camera;
 
@@ -37,13 +35,9 @@ public class EditorToolbox {
     public void update() {
         if (current_tool == null) return;
 
-        Vector3 screen_mouse = new Vector3(
-            input.mouse_position.x,
-            input.mouse_position.y,
-            0
-        );
-
         Vector2 world_mouse_position = get_world_mouse_postition();
+
+        if (input.left_just_pressed) current_tool.on_click(Input.Buttons.LEFT, world_mouse_position);
 
         if (input.left_just_released) {
             dragging = false;

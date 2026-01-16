@@ -8,6 +8,7 @@ import io.github.neaproject.physics.Stage;
 public class SelectBodyTool extends EditorTool {
 
     RigidBody dragging_body;
+    Vector2 body_relative_position;
 
     public SelectBodyTool(Stage stage) {
         super(stage);
@@ -28,15 +29,16 @@ public class SelectBodyTool extends EditorTool {
     public void on_drag(int button, Vector2 world_position, Vector2 mouse_delta) {
         if (button != Input.Buttons.LEFT) return;
 
-        RigidBody body = stage.get_overlapping_body(world_position);
-        if (body == null) return;
-
         if (dragging_body == null) {
+            RigidBody body = stage.get_overlapping_body(world_position);
+            if (body == null) return;
+
             dragging_body = body;
+            dragging_body.sleeping = true;
+            body_relative_position = dragging_body.position.cpy().sub(world_position);
         }
 
-        body.sleeping = true;
-        body.position.add(mouse_delta);
+        dragging_body.position.set(world_position.cpy().add(body_relative_position));
     }
 
     @Override

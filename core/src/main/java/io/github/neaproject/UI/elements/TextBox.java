@@ -13,11 +13,14 @@ import com.badlogic.gdx.utils.Align;
 
 public class TextBox extends Control{
 
-    BitmapFont font;
-    GlyphLayout layout = new GlyphLayout();
+    private BitmapFont font;
+    private GlyphLayout layout = new GlyphLayout();
+    public int alignment;
 
-    public TextBox(Vector2 position, float width, float height, String text, Color color, float scale) {
-        super(position, width, height);
+    public TextBox(String identifier, Vector2 position, float width, float height, String text, float scale, int alignment, Color color) {
+        super(identifier, width, height, position);
+
+        this.alignment = alignment;
 
         font = new BitmapFont(Gdx.files.internal("fonts/mono.fnt")); // loads all pages
 
@@ -31,18 +34,18 @@ public class TextBox extends Control{
         font.getData().setScale(scale);
         font.setColor(new Color(color));
 
-        layout.setText(font, text, Color.WHITE, width, Align.center, true);
+        layout.setText(font, text, Color.WHITE, width, alignment, true);
     }
 
-    public TextBox(Vector2 position, float width, float height, String text, Color color, float scale, Control parent) {
-        this(position, width, height, text, color, scale);
+    public TextBox(String identifier, Vector2 position, float width, float height, String text, Color color, float scale, int alignment, Control parent) {
+        this(identifier, position, width, height, text, scale, alignment, color);
         this.parent = parent;
         parent.add_child(this);
         this.z_order = parent.z_order+1;
     }
 
     public void set_text(String text) {
-        layout.setText(font, text, Color.WHITE, width, Align.center, true);
+        layout.setText(font, text, Color.WHITE, width, alignment, true);
     }
 
     @Override

@@ -25,7 +25,7 @@ public class CreateBodyTool extends EditorTool {
             1, true
         );
 
-        stage.add_body(b);
+        stage.world.add_body(b);
     }
 
     @Override

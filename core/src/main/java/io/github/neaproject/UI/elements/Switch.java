@@ -10,8 +10,8 @@ public class Switch extends Button {
 
     private Runnable[] state_actions;
 
-    public Switch(Vector2 position, float width, float height, Color color, int states) {
-        super(position, width, height, color);
+    public Switch(String identifier, Vector2 position, float width, float height, Color color, int states) {
+        super(identifier, position, width, height, color);
         this.states = Math.max(states, 2);
         current_state = 0;
         state_actions = new Runnable[states];
@@ -19,8 +19,8 @@ public class Switch extends Button {
         this.set_release_action(this::increment_state);
     }
 
-    public Switch(Vector2 position, float width, float height, Color color, int states, Control parent) {
-        this(position, width, height, color, states);
+    public Switch(String identifier, Vector2 position, float width, float height, Color color, int states, Control parent) {
+        this(identifier, position, width, height, color, states);
         this.parent = parent;
         parent.add_child(this);
         this.z_order = parent.z_order+1;

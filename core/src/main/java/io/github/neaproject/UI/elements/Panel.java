@@ -9,13 +9,13 @@ public class Panel extends Control{
 
     Color color;
 
-    public Panel(Vector2 position, float width, float height, Color color) {
-        super(position, width, height);
+    public Panel(String identifier, Vector2 position, float width, float height, Color color) {
+        super(identifier, width, height, position);
         this.color = color;
     }
 
-    public Panel(Vector2 position, float width, float height, Color color, Control parent) {
-        this(position, width, height, color);
+    public Panel(String identifier, Vector2 position, float width, float height, Color color, Control parent) {
+        this(identifier, position, width, height, color);
         this.parent = parent;
         parent.add_child(this);
         this.z_order = parent.z_order+1;

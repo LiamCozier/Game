@@ -13,15 +13,15 @@ public class Button extends Control implements Hoverable, Clickable {
     protected boolean hovering, pressing;
     protected Runnable click_action, release_action;
 
-    public Button(Vector2 position, float width, float height, Color color) {
-        super(position, width, height);
+    public Button(String identifier, Vector2 position, float width, float height, Color color) {
+        super(identifier, width, height, position);
         this.color = color;
         off_color = new Color(color);
         on_color = color.cpy().add(0.1f, 0.1f, 0.1f, 1);
     }
 
-    public Button(Vector2 position, float width, float height, Color color, Control parent) {
-        this(position, width, height, color);
+    public Button(String identifier, Vector2 position, float width, float height, Color color, Control parent) {
+        this(identifier, position, width, height, color);
         this.parent = parent;
         parent.add_child(this);
         this.z_order = parent.z_order+1;

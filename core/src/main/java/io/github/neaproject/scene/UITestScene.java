@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Align;
 import io.github.neaproject.UI.*;
 import io.github.neaproject.UI.elements.Button;
 import io.github.neaproject.UI.elements.Control;
@@ -55,10 +56,10 @@ public class UITestScene extends Scene {
         batch = new SpriteBatch();
 
         ui_manager = new UIManager();
-        panel = new Panel(new Vector2(10, 10), 300, 600, Color.WHITE);
-        text = new TextBox(new Vector2(20, 20), 260, 260, "The buttons.", Control.DARK_GREY.cpy(), 1f, panel);
-        button = new Button(new Vector2(20, 60), 260, 220, Control.DARK_GREY.cpy(), panel);
-        button2 = new Button(new Vector2(20, 360), 260, 220, Control.DARK_GREY.cpy(), panel);
+        panel = new Panel("a",new Vector2(10, 10), 300, 600, Color.WHITE);
+        text = new TextBox("a",new Vector2(20, 20), 260, 260, "The buttons.", Control.DARK_GREY.cpy(), 1f, Align.center, panel);
+        button = new Button("a", new Vector2(20, 60), 260, 220, Control.DARK_GREY.cpy(), panel);
+        button2 = new Button("a", new Vector2(20, 360), 260, 220, Control.DARK_GREY.cpy(), panel);
 
         button.set_click_action(() -> button.set_height(200));
         button.set_release_action(() -> button.set_height(220));

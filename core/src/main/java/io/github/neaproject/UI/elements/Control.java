@@ -17,6 +17,7 @@ public abstract class Control {
     // (0, 0) is top right of screen
     // y is downwards
 
+    private final String identifier;
     protected Vector2 viewport_position;
     protected Control parent;
     protected List<Control> children;
@@ -25,7 +26,8 @@ public abstract class Control {
     protected int z_order;
     public UIAnimator animator;
 
-    public Control(Vector2 viewport_position, float width, float height) {
+    public Control(String identifier, float width, float height, Vector2 viewport_position) {
+        this.identifier = identifier;
         this.viewport_position = viewport_position;
         this.width = width;
         this.height = height;
@@ -36,8 +38,8 @@ public abstract class Control {
         animator = new UIAnimator(this);
     }
 
-    public Control(Vector2 viewport_position, float width, float height, Control parent) {
-        this(viewport_position, width, height);
+    public Control(String identifier, float width, float height, Control parent, Vector2 viewport_position) {
+        this(identifier, width, height, viewport_position);
         this.parent = parent;
         parent.add_child(this);
         this.z_order = parent.z_order + 1;
@@ -103,6 +105,10 @@ public abstract class Control {
     public int get_z() {return this.z_order;}
 
     public void set_z(int z_order) {this.z_order = z_order;}
+
+    public String get_identifier() {
+        return this.identifier;
+    }
 
 
 }

@@ -123,4 +123,11 @@ public class UIManager {
             captured_clickable = null;
         }
     }
+
+    public Control get_node(String identifier) {
+        for (Control node: nodes) {
+            if (node.get_identifier().equals(identifier)) return node;
+        }
+        return null;
+    }
 }

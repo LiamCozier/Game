@@ -9,11 +9,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.FloatArray;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.ShortArray;
-import io.github.neaproject.UI.elements.Control;
-import io.github.neaproject.UI.elements.Panel;
 import io.github.neaproject.UI.elements.TextBox;
 import io.github.neaproject.input.CameraInputProcessor;
 import io.github.neaproject.physics.PhysicsWorld;
@@ -82,7 +81,7 @@ public class TestScene extends Scene{
         DELETE_BOX = new BoxDeletionTool(camera, world);
 
         batch = new SpriteBatch();
-        text = new TextBox(new Vector2(0,0), 150, 50, "text", Color.WHITE, 0.2f);
+        text = new TextBox("a", new Vector2(0,0), 150, 50, "text",0.2f, Align.center, Color.WHITE);
     }
 
     @Override

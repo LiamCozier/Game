@@ -7,9 +7,9 @@ import java.util.List;
 
 public class PhysicsWorld {
 
-    private static final int VELOCITY_ITERATIONS = 16;
+    private static final int VELOCITY_ITERATIONS = 8;
     private static final int POSITIONAL_ITERATIONS = 4;
-    private static final int SUBSTEPS = 16;
+    private static final int SUBSTEPS = 4;
 
     private final List<RigidBody> bodies;
     private final List<Contact> contacts;
@@ -39,9 +39,8 @@ public class PhysicsWorld {
 
         for (int s = 0; s < SUBSTEPS; s++) {
 
-            // ---- 1) INTEGRATE (always integrate all dynamic bodies) ----
             for (RigidBody body : bodies) {
-                if (body.inv_mass == 0f) continue; // static → no integration
+                if (body.inv_mass == 0f) continue;
                 if (body.sleeping) continue;
                 body.physics_tick(sub_dt);
             }
@@ -57,10 +56,8 @@ public class PhysicsWorld {
                     RigidBody body_b = bodies.get(j);
                     if (body_b.sleeping) continue;
 
-                    // both static → ignore
                     if (body_a.inv_mass + body_b.inv_mass == 0f) continue;
 
-                    // AABB early-out
                     if (!PhysicsManager.aabb_overlap(
                         body_a.get_bounding_box(),
                         body_b.get_bounding_box()

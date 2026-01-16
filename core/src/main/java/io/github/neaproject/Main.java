@@ -22,6 +22,7 @@ public class Main extends ApplicationAdapter {
     public void render() {
         // temp
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) Gdx.app.exit();
+        if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) && Gdx.input.isKeyPressed(Input.Keys.S)) manager.set_scene(new StressTestScene(manager));
 
         manager.scene.update(Gdx.graphics.getDeltaTime());
         manager.scene.render();

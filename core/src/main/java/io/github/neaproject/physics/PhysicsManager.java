@@ -469,9 +469,9 @@ public class PhysicsManager {
 
     public static void resolve_position(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
 
-        final float slop = 0.001f;
-        final float percent = 0.2f;
-        final float max_correction = 0.4f;
+        final float slop = 0.01f;
+        final float percent = 0.25f;
+        final float max_correction = 0.5f;
 
         Vector2 normal = manifold.collision_normal.cpy();
         if (normal.len2() == 0f) return;
