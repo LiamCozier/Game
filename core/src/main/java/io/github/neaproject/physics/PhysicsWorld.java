@@ -45,7 +45,7 @@ public class PhysicsWorld {
                 body.physics_tick(sub_dt);
             }
 
-            // build contact list
+            // editor_tool_sidebar contact list
             contacts.clear();
 
             for (int i = 0; i < body_count; i++) {

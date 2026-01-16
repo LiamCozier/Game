@@ -56,6 +56,10 @@ public abstract class Control {
         return new Vector2(parent.x + viewport_position.x, parent.y + viewport_position.y);
     }
 
+    public void set_position(Vector2 v) {
+        this.viewport_position.set(v);
+    }
+
     public void translate(Vector2 v) {
         this.viewport_position.add(v);
     }

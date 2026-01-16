@@ -42,7 +42,7 @@ public class StressTestScene extends Scene {
     private void init_ui() {
         ui_manager = new UIManager();
 
-        Panel root = new Panel("root", new Vector2(0,0), 172, 128, new Color(0,0,0,0.5f));
+        Panel root = new Panel("root", new Vector2(0,0), 256, 128, new Color(0,0,0,0.5f));
         new TextBox("body_info_text", new Vector2(16, 0), 256, 64, "", new Color(1, 1, 1, 1), 0.125f, Align.left, root);
         new TextBox("fps_info_text", new Vector2(16, 64), 256, 64, "", new Color(1, 1, 1, 1), 0.125f, Align.left, root);
 
@@ -118,8 +118,8 @@ public class StressTestScene extends Scene {
         fps_info_text.set_text("FPS: " + (int) fps);
 
         time += dt;
-        if (time >= 0.2f) {
-            time -= 0.2f;
+        if (time >= 0.5f) {
+            time -= 0.5f;
             Random r = new Random();
             for (int i=0; i<1; i++) {
                 stage.world.add_body(
@@ -134,7 +134,7 @@ public class StressTestScene extends Scene {
             }
         }
 
-        if (fps < 30 && size > 50) {
+        if (fps < 10 && size > 50) {
             Integer[] array1 = body_count_list.toArray(new Integer[0]);
             Integer[] array2 = fps_list.toArray(new Integer[0]);
 

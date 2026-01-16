@@ -1,40 +1,44 @@
 package io.github.neaproject.editor.tools;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
+import io.github.neaproject.UI.UIManager;
+import io.github.neaproject.UI.elements.Panel;
+import io.github.neaproject.UI.elements.composite.BodyEditor;
 import io.github.neaproject.physics.RigidBody;
 import io.github.neaproject.physics.Stage;
 import io.github.neaproject.physics.shape.BoxShape;
 
-import java.util.Random;
-
 
 public class CreateBodyTool extends EditorTool {
-    public CreateBodyTool(Stage stage) {
-        super(stage);
+    public CreateBodyTool(Stage stage, UIManager manager) {
+        super(stage, manager);
     }
 
     @Override
-    public void on_click(int button, Vector2 world_position) {
+    public void on_click(int button, MouseInfo info) {
         RigidBody b = new RigidBody(
-            world_position,
+            info.world_position,
             new Vector2(0, 0),
             new BoxShape(1, 1),
             0, 0,
             1, true
         );
+        b.sleeping = true;
 
         stage.world.add_body(b);
+        Panel body_editor = BodyEditor.body_editor();
+        body_editor.set_position(info.screen_position.cpy().add(new Vector2(64, -48)));
+        ui_manager.add_node(body_editor);
     }
 
     @Override
-    public void on_move(Vector2 world_position) {}
+    public void on_move(MouseInfo info) {}
 
     @Override
-    public void on_drag(int button, Vector2 world_position, Vector2 mouse_delta) {}
+    public void on_drag(int button, MouseInfo info) {}
 
     @Override
-    public void on_release(int button, Vector2 world_position) {}
+    public void on_release(int button, MouseInfo info) {}
 
 }

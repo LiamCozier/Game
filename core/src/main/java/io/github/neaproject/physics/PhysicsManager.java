@@ -409,7 +409,7 @@ public class PhysicsManager {
 
             relative_velocity = velocity_b_at_contact.cpy().sub(velocity_a_at_contact);
 
-            // build tangent = v_tangent direction
+            // editor_tool_sidebar tangent = v_tangent direction
             Vector2 tangent = relative_velocity.cpy().sub(
                 normal.cpy().scl(relative_velocity.dot(normal))
             );
