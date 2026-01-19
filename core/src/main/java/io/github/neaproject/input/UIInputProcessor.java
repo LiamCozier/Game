@@ -9,6 +9,8 @@ public class UIInputProcessor implements InputProcessor {
 
     public Vector2 mouse_position = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 
+    public StringBuilder type_text = new StringBuilder();
+
     public boolean left_pressed = false;
     public boolean left_just_pressed = false;
     public boolean left_just_released = false;
@@ -29,6 +31,7 @@ public class UIInputProcessor implements InputProcessor {
 
     @Override
     public boolean keyTyped(char character) {
+        type_text.append(character);
         return false;
     }
 

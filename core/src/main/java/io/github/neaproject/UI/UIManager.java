@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import io.github.neaproject.UI.elements.Control;
+import io.github.neaproject.UI.elements.InputTextBox;
 import io.github.neaproject.UI.interfaces.Clickable;
 import io.github.neaproject.UI.interfaces.Hoverable;
 import io.github.neaproject.input.UIInputProcessor;
@@ -16,17 +17,29 @@ import java.util.List;
 
 public class UIManager {
 
-    List<Control> nodes;
-    boolean nodes_dirty;
+    private final List<Control> nodes;
+    private boolean nodes_dirty;
 
-    Clickable captured_clickable;
+    private Clickable captured_clickable;
     public boolean input_captured;
+
+    private InputTextBox captured_input_text_box;
+    private boolean input_text_captured;
+
+    private Control focused_node;
+    private List<Control> focus_nodes;
 
     public UIManager() {
         nodes = new ArrayList<>(0);
         nodes_dirty = true;
+
         captured_clickable = null;
         input_captured = false;
+        captured_input_text_box = null;
+        input_text_captured = false;
+
+        focused_node = null;
+        focus_nodes = null;
     }
 
     private void sort_nodes() {
@@ -87,6 +100,12 @@ public class UIManager {
         Vector3 mouse_world3 = camera.unproject(new Vector3(input.mouse_position.x, input.mouse_position.y, 0));
         Vector2 mouse_screen = new Vector2(mouse_world3.x, -mouse_world3.y);
 
+        List<Control> nodes;
+        if (focused_node == null) {
+            nodes = this.nodes;
+        } else {
+            nodes = focus_nodes;
+        }
         for (Control node: nodes) {
 
             // cant input to invisible nodes
@@ -100,20 +119,23 @@ public class UIManager {
                 mouse_screen.y >= position.y && mouse_screen.y <= position.y + height;
             if (inside) input_captured = true;
 
-            if (node instanceof Hoverable) {
-                Hoverable hoverable = (Hoverable) node;
+            if (node instanceof Hoverable hoverable) {
 
                 if (inside) hoverable.on_hover();
                 else if (hoverable.is_hovering()) hoverable.on_unhover();
             }
 
-            if (node instanceof Clickable) {
-                Clickable clickable = (Clickable) node;
+            if (node instanceof Clickable clickable) {
 
                 if (inside && input.left_just_pressed && captured_clickable == null) {
                     captured_clickable = clickable;
                     clickable.on_click();
                 }
+            }
+
+            if (node instanceof InputTextBox box) {
+                captured_input_text_box = box;
+                box.type(input.type_text.toString());
             }
 
         }
@@ -122,6 +144,9 @@ public class UIManager {
             captured_clickable.on_release();
             captured_clickable = null;
         }
+
+        // clear text every frame after use
+        input.type_text.setLength(0);
     }
 
     public Control get_node(String identifier) {
@@ -130,4 +155,32 @@ public class UIManager {
         }
         return null;
     }
+
+    public void set_focus(Control node) {
+        this.focused_node = node;
+        this.focus_nodes = node.flatten_children();
+        this.focus_nodes.add(this.focused_node);
+    }
+
+    public void set_focus(String identifier) {
+        this.set_focus(get_node(identifier));
+    }
+
+    public void unfocus() {
+        this.focused_node = null;
+        this.focus_nodes = null;
+    }
+
+    public Control get_focus() {
+        return focused_node;
+    }
+
+    public boolean is_focused() {
+        return get_focus() != null;
+    }
+
+    public List<Control> get_focus_tree() {
+        return focus_nodes;
+    }
+
 }

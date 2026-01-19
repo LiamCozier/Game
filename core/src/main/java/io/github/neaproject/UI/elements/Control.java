@@ -114,5 +114,16 @@ public abstract class Control {
         return this.identifier;
     }
 
+    public List<Control> flatten_children() {
+        if (this.children == null) return new ArrayList<>();
+
+        List<Control> children = new ArrayList<>();
+        for (Control child: this.children) {
+            children.add(child);
+            children.addAll(child.flatten_children());
+        }
+        return children;
+    }
+
 
 }

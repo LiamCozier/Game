@@ -36,18 +36,18 @@ public class MainMenuScene extends Scene {
         Panel root_panel = new Panel("root_panel", new Vector2(0,0), 600, 1080, new Color(0.1f, 0.1f, 0.1f, 0.6f));
 
         Button load_button = new Button("load_button", new Vector2(30, 360), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
-        new TextBox("load_button_text", new Vector2(0,0), 540, 150, "Load Stage", Color.WHITE, 0.2f, Align.center, load_button);
+        new TextBox("load_button_text", new Vector2(0,0), 540, 150, "Load Stage", 0.2f, Align.center, Color.WHITE, load_button);
         load_button.set_release_action(() -> manager.set_scene(new TestScene(manager)));
 
         Button edit_button = new Button("edit_button", new Vector2(30, 540), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
-        new TextBox("edit_button_text", new Vector2(0,0), 540, 150, "Edit Stage", Color.WHITE, 0.2f, Align.center, edit_button);
+        new TextBox("edit_button_text", new Vector2(0,0), 540, 150, "Edit Stage", 0.2f, Align.center, Color.WHITE, edit_button);
         edit_button.set_release_action(() -> manager.set_scene(new StageEditorScene(manager)));
 
         Button settings_button = new Button("settings_button", new Vector2(30, 720), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
-        new TextBox("settings_button_text", new Vector2(0,0), 540, 150, "Settings", Color.WHITE, 0.2f, Align.center, settings_button);
+        new TextBox("settings_button_text", new Vector2(0,0), 540, 150, "Settings", 0.2f, Align.center, Color.WHITE, settings_button);
 
         Button exit_button = new Button("exit_button", new Vector2(30, 900), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
-        new TextBox("exit_button_text", new Vector2(0,0), 540, 150, "Exit to desktop", Color.WHITE, 0.2f, Align.center, exit_button);
+        new TextBox("exit_button_text", new Vector2(0,0), 540, 150, "Exit to desktop", 0.2f, Align.center, Color.WHITE, exit_button);
         exit_button.set_release_action(() -> Gdx.app.exit());
 
         ui_manager.add_node(root_panel);

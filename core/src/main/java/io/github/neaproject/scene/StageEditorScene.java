@@ -38,8 +38,6 @@ public class StageEditorScene extends Scene {
     Stage stage;
 
     private void init_ui() {
-        ui_manager = new UIManager();
-
         Panel sidebar = Sidebar.editor_tool_sidebar(toolbox);
 
         ui_manager.add_node(sidebar);
@@ -60,8 +58,6 @@ public class StageEditorScene extends Scene {
         ui_camera.translate(new Vector2(ui_width, -ui_height).scl(0.5f));
         ui_camera.update();
 
-        init_ui();
-
         ui_input = new UIInputProcessor();
         editor_input = new EditorInputProcessor();
 
@@ -76,8 +72,12 @@ public class StageEditorScene extends Scene {
 
         stage = new Stage();
 
+        ui_manager = new UIManager();
+
         toolbox = new EditorToolbox(stage, editor_input, camera, ui_manager);
         toolbox.set_tool(1);
+
+        init_ui();
     }
 
     @Override

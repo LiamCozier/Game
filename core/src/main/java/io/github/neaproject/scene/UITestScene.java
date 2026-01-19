@@ -57,7 +57,7 @@ public class UITestScene extends Scene {
 
         ui_manager = new UIManager();
         panel = new Panel("a",new Vector2(10, 10), 300, 600, Color.WHITE);
-        text = new TextBox("a",new Vector2(20, 20), 260, 260, "The buttons.", Control.DARK_GREY.cpy(), 1f, Align.center, panel);
+        text = new TextBox("a",new Vector2(20, 20), 260, 260, "The buttons.", 1f, Align.center, Control.DARK_GREY.cpy(), panel);
         button = new Button("a", new Vector2(20, 60), 260, 220, Control.DARK_GREY.cpy(), panel);
         button2 = new Button("a", new Vector2(20, 360), 260, 220, Control.DARK_GREY.cpy(), panel);
 

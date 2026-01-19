@@ -43,8 +43,8 @@ public class StressTestScene extends Scene {
         ui_manager = new UIManager();
 
         Panel root = new Panel("root", new Vector2(0,0), 256, 128, new Color(0,0,0,0.5f));
-        new TextBox("body_info_text", new Vector2(16, 0), 256, 64, "", new Color(1, 1, 1, 1), 0.125f, Align.left, root);
-        new TextBox("fps_info_text", new Vector2(16, 64), 256, 64, "", new Color(1, 1, 1, 1), 0.125f, Align.left, root);
+        new TextBox("body_info_text", new Vector2(16, 0), 256, 64, "", 0.125f, Align.left, new Color(1, 1, 1, 1), root);
+        new TextBox("fps_info_text", new Vector2(16, 64), 256, 64, "", 0.125f, Align.left, new Color(1, 1, 1, 1), root);
 
 
         ui_manager.add_node(root);

@@ -30,6 +30,7 @@ public class CreateBodyTool extends EditorTool {
         Panel body_editor = BodyEditor.body_editor();
         body_editor.set_position(info.screen_position.cpy().add(new Vector2(64, -48)));
         ui_manager.add_node(body_editor);
+        ui_manager.set_focus(body_editor);
     }
 
     @Override
