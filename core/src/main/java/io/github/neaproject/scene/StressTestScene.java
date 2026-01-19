@@ -118,8 +118,8 @@ public class StressTestScene extends Scene {
         fps_info_text.set_text("FPS: " + (int) fps);
 
         time += dt;
-        if (time >= 0.5f) {
-            time -= 0.5f;
+        if (time >= 0.2f) {
+            time -= 0.2f;
             Random r = new Random();
             for (int i=0; i<1; i++) {
                 stage.world.add_body(
