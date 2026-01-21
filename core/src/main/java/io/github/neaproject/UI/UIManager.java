@@ -140,6 +140,11 @@ public class UIManager {
 
         }
 
+        if (!input_captured && focused_node != null) {
+            unfocus();
+            input_captured = true;
+        }
+
         if (input.left_just_released && captured_clickable != null) {
             captured_clickable.on_release();
             captured_clickable = null;
