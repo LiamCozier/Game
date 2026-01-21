@@ -5,18 +5,33 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 import io.github.neaproject.UI.interfaces.Clickable;
+import io.github.neaproject.UI.interfaces.Focusable;
 
-public class InputTextBox extends TextBox implements Clickable {
+public class InputTextBox extends TextBox implements Clickable , Focusable {
 
-    String input_text;
+    public static final int NONE = 0;
+    public static final int NO_SYMBOLS = 1;
+    public static final int LETTERS_ONLY = 2;
+    public static final int NUMBERS_ONLY = 3;
 
-    public InputTextBox(String identifier, Vector2 position, float width, float height, float scale, Color color) {
+    private final int MAX_LENGTH;
+    private final int INPUT_RESTRICTIONS;
+
+    private String input_text;
+    public boolean focused;
+
+
+    public InputTextBox(String identifier, Vector2 position, float width, float height, float scale, int max_length, int input_restrictions, Color color) {
         super(identifier, position, width, height, "", scale, Align.left, color);
+        this.MAX_LENGTH = max_length;
+        this.INPUT_RESTRICTIONS = input_restrictions;
         input_text = "";
     }
 
-    public InputTextBox(String identifier, Vector2 position, float width, float height, float scale, Color color, Control parent) {
+    public InputTextBox(String identifier, Vector2 position, float width, float height, float scale, int max_length, int input_restrictions, Color color, Control parent) {
         super(identifier, position, width, height, "", scale, Align.left, color, parent);
+        this.MAX_LENGTH = max_length;
+        this.INPUT_RESTRICTIONS = input_restrictions;
         input_text = "";
     }
 
@@ -43,7 +58,34 @@ public class InputTextBox extends TextBox implements Clickable {
     }
 
     public void type(String text) {
-        input_text += text;
+        StringBuilder builder = new StringBuilder(text);
+
+        for (int i = 0; i<builder.length(); i++) {
+            char c = builder.charAt(i);
+            switch (this.INPUT_RESTRICTIONS) {
+                case NO_SYMBOLS:
+                    if (!"01234567890abcdefghijklmnopqrstuvwxyz".contains((CharSequence) c))
+                    break;
+                case LETTERS_ONLY:
+                    break;
+                case NUMBERS_ONLY:
+                    break;
+            }
+        }
+        input_text += builder;
         super.set_text(input_text);
     }
+
+    @Override
+    public void on_focus() {
+        this.focused = true;
+    }
+
+    @Override
+    public void on_unfocus() {
+        this.focused = false;
+    }
+
+
+
 }

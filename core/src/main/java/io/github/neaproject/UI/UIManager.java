@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector3;
 import io.github.neaproject.UI.elements.Control;
 import io.github.neaproject.UI.elements.InputTextBox;
 import io.github.neaproject.UI.interfaces.Clickable;
+import io.github.neaproject.UI.interfaces.Focusable;
 import io.github.neaproject.UI.interfaces.Hoverable;
 import io.github.neaproject.input.UIInputProcessor;
 
@@ -23,23 +24,14 @@ public class UIManager {
     private Clickable captured_clickable;
     public boolean input_captured;
 
-    private InputTextBox captured_input_text_box;
-    private boolean input_text_captured;
-
-    private Control focused_node;
-    private List<Control> focus_nodes;
+    private Focusable focused_node;
 
     public UIManager() {
         nodes = new ArrayList<>(0);
         nodes_dirty = true;
-
         captured_clickable = null;
         input_captured = false;
-        captured_input_text_box = null;
-        input_text_captured = false;
-
         focused_node = null;
-        focus_nodes = null;
     }
 
     private void sort_nodes() {
@@ -96,17 +88,16 @@ public class UIManager {
     public void take_input(UIInputProcessor input, Camera camera) {
         if (nodes_dirty) sort_nodes();
         input_captured = false;
+        boolean clicked_focusable = false;
 
         Vector3 mouse_world3 = camera.unproject(new Vector3(input.mouse_position.x, input.mouse_position.y, 0));
         Vector2 mouse_screen = new Vector2(mouse_world3.x, -mouse_world3.y);
 
-        List<Control> nodes;
-        if (focused_node == null) {
-            nodes = this.nodes;
-        } else {
-            nodes = focus_nodes;
-        }
-        for (Control node: nodes) {
+        List<Control> node_list;
+        // reverse because z-order is opposite for rendering and taking input
+        node_list = this.nodes.reversed();
+
+        for (Control node: node_list) {
 
             // cant input to invisible nodes
             if (node.is_invisible()) continue;
@@ -115,12 +106,13 @@ public class UIManager {
             float width = node.get_width();
             float height = node.get_height();
 
-            boolean inside = mouse_screen.x >= position.x && mouse_screen.x <= position.x + width &&
+            boolean inside =
+                mouse_screen.x >= position.x && mouse_screen.x <= position.x + width &&
                 mouse_screen.y >= position.y && mouse_screen.y <= position.y + height;
+
             if (inside) input_captured = true;
 
             if (node instanceof Hoverable hoverable) {
-
                 if (inside) hoverable.on_hover();
                 else if (hoverable.is_hovering()) hoverable.on_unhover();
             }
@@ -133,21 +125,27 @@ public class UIManager {
                 }
             }
 
-            if (node instanceof InputTextBox box) {
-                captured_input_text_box = box;
-                box.type(input.type_text.toString());
+            if (node instanceof Focusable focusable) {
+                if (inside && input.left_just_pressed) {
+                    set_focus(focusable);
+                    clicked_focusable = true;
+                }
             }
 
         }
 
-        if (!input_captured && focused_node != null) {
-            unfocus();
-            input_captured = true;
+        // focus node
+
+        if (input.left_just_pressed && !clicked_focusable && focused_node != null) unfocus();
+        if (focused_node instanceof InputTextBox box) {
+            box.type(input.type_text.toString());
         }
 
-        if (input.left_just_released && captured_clickable != null) {
-            captured_clickable.on_release();
-            captured_clickable = null;
+        if (input.left_just_released ) {
+            if (captured_clickable != null) {
+                captured_clickable.on_release();
+                captured_clickable = null;
+            }
         }
 
         // clear text every frame after use
@@ -161,31 +159,27 @@ public class UIManager {
         return null;
     }
 
-    public void set_focus(Control node) {
+    public void set_focus(Focusable node) {
+        node.on_focus();
+
         this.focused_node = node;
-        this.focus_nodes = node.flatten_children();
-        this.focus_nodes.add(this.focused_node);
     }
 
     public void set_focus(String identifier) {
-        this.set_focus(get_node(identifier));
+        this.set_focus((Focusable) get_node(identifier));
     }
 
     public void unfocus() {
+        this.focused_node.on_unfocus();
         this.focused_node = null;
-        this.focus_nodes = null;
     }
 
     public Control get_focus() {
-        return focused_node;
+        return (Control) focused_node;
     }
 
     public boolean is_focused() {
         return get_focus() != null;
-    }
-
-    public List<Control> get_focus_tree() {
-        return focus_nodes;
     }
 
 }
