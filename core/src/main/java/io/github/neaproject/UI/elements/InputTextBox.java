@@ -23,7 +23,7 @@ public class InputTextBox extends TextBox implements Clickable {
     @Override
     public void shape_render(ShapeRenderer sr) {
         Vector2 position = this.position();
-        sr.setColor(new Color(0.2f, 0.2f, 0.2f, 1));
+        sr.setColor(new Color(0.1f, 0.1f, 0.1f, 1));
         sr.rect(position.x, -position.y-height, width, height);
     }
 
