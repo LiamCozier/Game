@@ -40,6 +40,7 @@ public class SelectBodyTool extends EditorTool {
         }
 
         dragging_body.position.set(info.world_position.cpy().add(body_relative_position));
+        dragging_body.velocity.set(info.mouse_delta);
     }
 
     @Override

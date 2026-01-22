@@ -56,10 +56,13 @@ public class UIManager {
         for (Control child: node.get_children()) add_node(child);
     }
 
-    public void add_node(Control node, boolean add_children) {
-        nodes_dirty = true;
-        nodes.add(node);
-        if (add_children) nodes.addAll(node.get_children());
+    public void remove_node(Control node) {
+        // cut off loose ends
+        if (focused_node == node) focused_node = null;
+        if (captured_clickable == node) captured_clickable = null;
+
+        nodes.remove(node);
+        for (Control child: node.get_children()) remove_node(child);
     }
 
     public void render_all(ShapeRenderer sr, SpriteBatch batch) {
@@ -136,7 +139,10 @@ public class UIManager {
 
         // focus node
 
-        if (input.left_just_pressed && !clicked_focusable && focused_node != null) unfocus();
+        if (focused_node != null) {
+            if (input.left_just_pressed && !clicked_focusable) unfocus();
+            else if (!focused_node.is_focused()) unfocus();
+        }
         if (focused_node instanceof InputTextBox box) {
             box.type(input.type_text.toString());
         }

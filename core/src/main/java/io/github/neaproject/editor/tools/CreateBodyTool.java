@@ -1,6 +1,7 @@
 package io.github.neaproject.editor.tools;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import io.github.neaproject.UI.UIManager;
 import io.github.neaproject.UI.elements.Panel;
@@ -27,9 +28,8 @@ public class CreateBodyTool extends EditorTool {
         b.sleeping = true;
 
         stage.world.add_body(b);
-        Panel body_editor = BodyEditor.body_editor();
-        body_editor.set_position(info.screen_position.cpy().add(new Vector2(64, -48)));
-        ui_manager.add_node(body_editor);
+        BodyEditor body_editor = new BodyEditor(ui_manager, b);
+        body_editor.root.set_position(info.screen_position.cpy().add(new Vector2(64, -48)));
     }
 
     @Override

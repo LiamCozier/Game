@@ -2,7 +2,8 @@ package io.github.neaproject.UI.interfaces;
 
 public interface Focusable {
 
-    public void on_focus();
-    public void on_unfocus();
+    void on_focus();
+    void on_unfocus();
+    boolean is_focused();
 
 }

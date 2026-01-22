@@ -8,13 +8,13 @@ public class RigidBody extends Particle {
     public float orientation;
     public float angular_velocity;
     public boolean sleeping;
-    public final float mass;
-    public final float inv_mass;
-    public final float inertia;
-    public final float inv_inertia;
-    public final float restitution;
-    public final float static_friction;
-    public final float dynamic_friction;
+    private float mass;
+    private float inv_mass;
+    public float inertia;
+    public float inv_inertia;
+    public float restitution;
+    public float static_friction;
+    public float dynamic_friction;
 
     public RigidBody(Vector2 position, Vector2 velocity, Shape shape, float orientation, float angular_velocity, float mass, boolean has_gravity) {
 
@@ -44,11 +44,6 @@ public class RigidBody extends Particle {
             this.inertia = 0.0833f * mass * (width_sq + height_sq);
             this.inv_inertia = 1f / this.inertia;
         }
-    }
-
-    public void tick(float deltaT) {
-        particle_tick(deltaT);
-        orientation += angular_velocity * deltaT;
     }
 
     private Vector2 calc_midpoint(Vector2[] points) {
@@ -155,6 +150,19 @@ public class RigidBody extends Particle {
         }
 
         return new BoundingBox(new Vector2(min_x, min_y), new Vector2(max_x, max_y));
+    }
+
+    public void set_mass(float mass) {
+        this.mass = mass;
+        this.inv_mass = (mass == 0f ? 0f : 1f / mass);
+    }
+
+    public float get_mass() {
+        return mass;
+    }
+
+    public float get_inv_mass() {
+        return inv_mass;
     }
 
 }

@@ -292,7 +292,7 @@ public class PhysicsManager {
     public static void resolve_velocity(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
 
         // if both bodies are static, do nothing
-        if (body_a.inv_mass + body_b.inv_mass == 0f) {
+        if (body_a.get_inv_mass() + body_b.get_inv_mass() == 0f) {
             return;
         }
 
@@ -365,7 +365,7 @@ public class PhysicsManager {
             float rb_cross_n = rb.x * normal.y - rb.y * normal.x;
 
             float inv_mass_sum =
-                body_a.inv_mass + body_b.inv_mass +
+                body_a.get_inv_mass() + body_b.get_inv_mass() +
                     (ra_cross_n * ra_cross_n) * body_a.inv_inertia +
                     (rb_cross_n * rb_cross_n) * body_b.inv_inertia;
 
@@ -382,8 +382,8 @@ public class PhysicsManager {
             Vector2 normal_impulse = normal.cpy().scl(normal_impulse_scalar);
 
             // apply normal impulse to linear velocity  (pattern A: -J/m, B: +J/m)
-            body_a.velocity.sub(normal_impulse.cpy().scl(body_a.inv_mass));
-            body_b.velocity.add(normal_impulse.cpy().scl(body_b.inv_mass));
+            body_a.velocity.sub(normal_impulse.cpy().scl(body_a.get_inv_mass()));
+            body_b.velocity.add(normal_impulse.cpy().scl(body_b.get_inv_mass()));
 
             // apply normal impulse to angular velocity (torque = r x J)
             float ra_cross_jn = ra.x * normal_impulse.y - ra.y * normal_impulse.x;
@@ -426,7 +426,7 @@ public class PhysicsManager {
             float rb_cross_t = rb.x * tangent.y - rb.y * tangent.x;
 
             float inv_mass_sum_tangent =
-                body_a.inv_mass + body_b.inv_mass +
+                body_a.get_inv_mass() + body_b.get_inv_mass() +
                     (ra_cross_t * ra_cross_t) * body_a.inv_inertia +
                     (rb_cross_t * rb_cross_t) * body_b.inv_inertia;
 
@@ -452,8 +452,8 @@ public class PhysicsManager {
             Vector2 friction_impulse = tangent.cpy().scl(tangent_impulse_scalar);
 
             // apply friction impulse to linear velocity
-            body_a.velocity.sub(friction_impulse.cpy().scl(body_a.inv_mass));
-            body_b.velocity.add(friction_impulse.cpy().scl(body_b.inv_mass));
+            body_a.velocity.sub(friction_impulse.cpy().scl(body_a.get_inv_mass()));
+            body_b.velocity.add(friction_impulse.cpy().scl(body_b.get_inv_mass()));
 
             // apply friction impulse to angular velocity
             float ra_cross_jt = ra.x * friction_impulse.y - ra.y * friction_impulse.x;
@@ -483,12 +483,12 @@ public class PhysicsManager {
 
         correction_mag *= percent;
 
-        float inv_mass_sum = body_a.inv_mass + body_b.inv_mass;
+        float inv_mass_sum = body_a.get_inv_mass() + body_b.get_inv_mass();
         if (inv_mass_sum > 0f) {
             Vector2 correction = normal.cpy().scl(correction_mag / inv_mass_sum);
 
-            body_a.position.sub(correction.cpy().scl(body_a.inv_mass));
-            body_b.position.add(correction.cpy().scl(body_b.inv_mass));
+            body_a.position.sub(correction.cpy().scl(body_a.get_inv_mass()));
+            body_b.position.add(correction.cpy().scl(body_b.get_inv_mass()));
         }
     }
 

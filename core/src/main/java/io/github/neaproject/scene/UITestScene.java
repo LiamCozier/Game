@@ -64,7 +64,6 @@ public class UITestScene extends Scene {
         button.set_click_action(() -> button.set_height(200));
         button.set_release_action(() -> button.set_height(220));
 
-        button2.set_release_action(() -> manager.set_scene(new TestScene(manager)));
 
         ui_manager.add_node(panel);
 

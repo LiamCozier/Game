@@ -37,7 +37,6 @@ public class MainMenuScene extends Scene {
 
         Button load_button = new Button("load_button", new Vector2(30, 360), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
         new TextBox("load_button_text", new Vector2(0,0), 540, 150, "Load Stage", 0.2f, Align.center, Color.WHITE, load_button);
-        load_button.set_release_action(() -> manager.set_scene(new TestScene(manager)));
 
         Button edit_button = new Button("edit_button", new Vector2(30, 540), 540, 150, Color.DARK_GRAY.cpy(), root_panel);
         new TextBox("edit_button_text", new Vector2(0,0), 540, 150, "Edit Stage", 0.2f, Align.center, Color.WHITE, edit_button);

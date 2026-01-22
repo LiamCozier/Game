@@ -40,7 +40,7 @@ public class PhysicsWorld {
         for (int s = 0; s < SUBSTEPS; s++) {
 
             for (RigidBody body : bodies) {
-                if (body.inv_mass == 0f) continue;
+                if (body.get_inv_mass() == 0f) continue;
                 if (body.sleeping) continue;
                 body.physics_tick(sub_dt);
             }
@@ -56,7 +56,7 @@ public class PhysicsWorld {
                     RigidBody body_b = bodies.get(j);
                     if (body_b.sleeping) continue;
 
-                    if (body_a.inv_mass + body_b.inv_mass == 0f) continue;
+                    if (body_a.get_inv_mass() + body_b.get_inv_mass() == 0f) continue;
 
                     if (!PhysicsManager.aabb_overlap(
                         body_a.get_bounding_box(),
