@@ -7,37 +7,51 @@ import com.badlogic.gdx.utils.Align;
 import io.github.neaproject.UI.interfaces.Clickable;
 import io.github.neaproject.UI.interfaces.Focusable;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class InputTextBox extends TextBox implements Clickable, Focusable {
 
     public interface InputReceiver {
-        void receive_input(String input_text);
+        void receive_input(String field_id, String input_text);
     }
 
-    public static final int NONE = 0;
-    public static final int NO_SYMBOLS = 1;
-    public static final int LETTERS_ONLY = 2;
-    public static final int NUMBERS_ONLY = 3;
+    public enum InputFilter {
+        NONE, NO_SYMBOLS, LETTERS, INTEGER, FLOAT
+    }
+
+    public static final Map<InputFilter, String> input_filter_map = new HashMap<>();
+    static {
+        input_filter_map.put(InputFilter.NONE, "");
+        input_filter_map.put(InputFilter.NO_SYMBOLS, "0123456789abcdefghijklmnopqrstuvwxyz");
+        input_filter_map.put(InputFilter.LETTERS, "abcdefghijklmnopqrstuvwxyz");
+        input_filter_map.put(InputFilter.INTEGER, "0123456789");
+        input_filter_map.put(InputFilter.FLOAT, "0123456789.");
+    }
 
     private final int MAX_LENGTH;
-    private final int INPUT_RESTRICTIONS;
+    private final InputFilter INPUT_RESTRICTIONS;
 
+    public String field_id;
     private String input_text;
     public boolean focused;
 
     InputReceiver receiver;
 
 
-    public InputTextBox(String identifier, Vector2 position, float width, float height, float scale, int max_length, int input_restrictions, Color color) {
+    public InputTextBox(String identifier, String field_id, Vector2 position, float width, float height, float scale, int max_length, InputFilter input_restrictions, Color color) {
         super(identifier, position, width, height, "", scale, Align.left, color);
         this.MAX_LENGTH = max_length;
+        this.field_id = field_id;
         this.INPUT_RESTRICTIONS = input_restrictions;
         input_text = "";
         receiver = null;
     }
 
-    public InputTextBox(String identifier, Vector2 position, float width, float height, float scale, int max_length, int input_restrictions, Color color, Control parent) {
+    public InputTextBox(String identifier, String field_id, Vector2 position, float width, float height, float scale, int max_length, InputFilter input_restrictions, Color color, Control parent) {
         super(identifier, position, width, height, "", scale, Align.left, color, parent);
         this.MAX_LENGTH = max_length;
+        this.field_id = field_id;
         this.INPUT_RESTRICTIONS = input_restrictions;
         input_text = "";
         receiver = null;
@@ -85,25 +99,10 @@ public class InputTextBox extends TextBox implements Clickable, Focusable {
                 continue;
             }
 
-            switch (this.INPUT_RESTRICTIONS) {
-                case NO_SYMBOLS:
-                    if ("0123456789abcdefghijklmnopqrstuvwxyz".indexOf(c) == -1) {
-                        builder.deleteCharAt(i);
-                        i--;
-                    }
-                    break;
-                case LETTERS_ONLY:
-                    if ("abcdefghijklmnopqrstuvwxyz ".indexOf(c) == -1) {
-                        builder.deleteCharAt(i);
-                        i--;
-                    }
-                    break;
-                case NUMBERS_ONLY:
-                    if ("0123456789".indexOf(c) == -1) {
-                        builder.deleteCharAt(i);
-                        i--;
-                    }
-                    break;
+            String filter_string = input_filter_map.get(INPUT_RESTRICTIONS);
+            if (filter_string.indexOf(c) == -1) {
+                builder.deleteCharAt(i);
+                i--;
             }
         }
         input_text += builder;
@@ -116,7 +115,6 @@ public class InputTextBox extends TextBox implements Clickable, Focusable {
     }
 
     private void enter() {
-        send_input();
         on_unfocus();
     }
 
@@ -127,6 +125,7 @@ public class InputTextBox extends TextBox implements Clickable, Focusable {
 
     @Override
     public void on_unfocus() {
+        send_input();
         this.focused = false;
     }
 
@@ -140,7 +139,7 @@ public class InputTextBox extends TextBox implements Clickable, Focusable {
     }
 
     public void send_input() {
-        this.receiver.receive_input(input_text);
+        this.receiver.receive_input(field_id, input_text);
     }
 
 

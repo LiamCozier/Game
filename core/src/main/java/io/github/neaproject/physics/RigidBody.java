@@ -165,4 +165,8 @@ public class RigidBody extends Particle {
         return inv_mass;
     }
 
+    public Shape get_shape() {
+        return this.shape;
+    }
+
 }

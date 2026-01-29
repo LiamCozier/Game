@@ -33,4 +33,20 @@ public class BoxShape extends Shape {
             position.cpy().add(new Vector2(width/2, height/2))
         );
     }
+
+    public float get_width() {
+        return width;
+    }
+
+    public void set_width(float width) {
+        this.width = width;
+    }
+
+    public float get_height() {
+        return height;
+    }
+
+    public void set_height(float height) {
+        this.height = height;
+    }
 }
