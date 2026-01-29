@@ -19,14 +19,6 @@ public class Stage {
     }
 
     public void initialise() {
-
-        world.add_body(new RigidBody(
-            new Vector2(0, -5),
-            new Vector2(0, 0),
-            new BoxShape(20, 1),
-            0f, 0f,
-            0f, false
-        ));
     }
 
     public void tick(float dt) {

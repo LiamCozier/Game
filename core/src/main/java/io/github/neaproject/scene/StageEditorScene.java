@@ -14,7 +14,9 @@ import io.github.neaproject.UI.elements.composite.*;
 import io.github.neaproject.editor.tools.EditorToolbox;
 import io.github.neaproject.input.EditorInputProcessor;
 import io.github.neaproject.input.UIInputProcessor;
+import io.github.neaproject.physics.RigidBody;
 import io.github.neaproject.physics.Stage;
+import io.github.neaproject.physics.shape.BoxShape;
 
 public class StageEditorScene extends Scene {
 
@@ -71,6 +73,14 @@ public class StageEditorScene extends Scene {
         batch = new SpriteBatch();
 
         stage = new Stage();
+
+        stage.world.add_body(new RigidBody(
+            new Vector2(0, -5),
+            new Vector2(0, 0),
+            new BoxShape(20, 1),
+            0f, 0f,
+            0f, false
+        ));
 
         ui_manager = new UIManager();
 

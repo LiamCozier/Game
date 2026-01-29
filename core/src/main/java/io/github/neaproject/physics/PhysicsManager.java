@@ -378,6 +378,7 @@ public class PhysicsManager {
             // normal impulse
             float normal_impulse_scalar = -(1f + restitution) * contact_velocity_normal;
             normal_impulse_scalar /= inv_mass_sum;
+            normal_impulse_scalar /= contact_count;
 
             Vector2 normal_impulse = normal.cpy().scl(normal_impulse_scalar);
 
@@ -438,11 +439,10 @@ public class PhysicsManager {
             // base friction impulse magnitude
             float tangent_impulse_scalar = -contact_velocity_tangent;
             tangent_impulse_scalar /= inv_mass_sum_tangent;
+            tangent_impulse_scalar /= contact_count;
 
-            // correct static-friction clamp: use |Jn|
             float max_static_friction_impulse = Math.abs(normal_impulse_scalar) * static_friction;
 
-            // Coulomb friction: clamp or fall back to dynamic
             if (Math.abs(tangent_impulse_scalar) > max_static_friction_impulse) {
                 tangent_impulse_scalar =
                     -Math.signum(contact_velocity_tangent) *
@@ -469,9 +469,9 @@ public class PhysicsManager {
 
     public static void resolve_position(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
 
-        final float slop = 0.01f;
-        final float percent = 0.25f;
-        final float max_correction = 0.5f;
+        final float slop = 0.001f;
+        final float percent = 0.5f;
+        final float max_correction = 0.2f;
 
         Vector2 normal = manifold.collision_normal.cpy();
         if (normal.len2() == 0f) return;

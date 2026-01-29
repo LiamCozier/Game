@@ -166,8 +166,8 @@ public class UIManager {
     }
 
     public void set_focus(Focusable node) {
+        if (this.focused_node != null) focused_node.on_unfocus();
         node.on_focus();
-
         this.focused_node = node;
     }
 
