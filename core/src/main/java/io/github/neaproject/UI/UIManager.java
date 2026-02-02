@@ -58,7 +58,7 @@ public class UIManager {
 
     public void remove_node(Control node) {
         // cut off loose ends
-        if (focused_node == node) focused_node = null;
+        if (focused_node == node) unfocus();
         if (captured_clickable == node) captured_clickable = null;
 
         nodes.remove(node);

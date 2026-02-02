@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Align;
 import io.github.neaproject.UI.UIManager;
 import io.github.neaproject.UI.elements.*;
 import io.github.neaproject.physics.RigidBody;
-import io.github.neaproject.physics.Stage;
 import io.github.neaproject.physics.shape.BoxShape;
 import org.w3c.dom.Text;
 
