@@ -35,6 +35,7 @@ public class StageEditorScene extends Scene {
     SpriteBatch batch;
 
     EditorToolbox toolbox;
+    BodyEditor body_editor;
 
     // physics
     Stage stage;
