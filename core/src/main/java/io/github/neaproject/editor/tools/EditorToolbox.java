@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import io.github.neaproject.UI.UIManager;
+import io.github.neaproject.UI.elements.composite.BodyEditor;
 import io.github.neaproject.input.EditorInputProcessor;
 import io.github.neaproject.physics.Stage;
 
@@ -22,11 +23,11 @@ public class EditorToolbox {
 
     private boolean dragging;
 
-    public EditorToolbox(Stage stage, EditorInputProcessor editor_input_processor, OrthographicCamera camera, UIManager manager) {
+    public EditorToolbox(Stage stage, EditorInputProcessor editor_input_processor, OrthographicCamera camera, UIManager manager, BodyEditor body_editor) {
         this.input = editor_input_processor;
         this.camera = camera;
 
-        CREATE_BODY_TOOL = new CreateBodyTool(stage, manager);
+        CREATE_BODY_TOOL = new CreateBodyTool(stage, manager, body_editor);
         SELECT_BODY_TOOL = new SelectBodyTool(stage, manager);
 
         current_tool = null;

@@ -40,7 +40,7 @@ public class InputTextBox extends TextBox implements Clickable, Focusable {
 
 
     public InputTextBox(String identifier, String field_id, Vector2 position, float width, float height, float scale, int max_length, InputFilter input_restrictions, Color color) {
-        super(identifier, position, width, height, "", scale, Align.left, color);
+        super(identifier, position, width, height, "", scale, Align.center, color);
         this.MAX_LENGTH = max_length;
         this.field_id = field_id;
         this.INPUT_RESTRICTIONS = input_restrictions;
@@ -49,7 +49,7 @@ public class InputTextBox extends TextBox implements Clickable, Focusable {
     }
 
     public InputTextBox(String identifier, String field_id, Vector2 position, float width, float height, float scale, int max_length, InputFilter input_restrictions, Color color, Control parent) {
-        super(identifier, position, width, height, "", scale, Align.left, color, parent);
+        super(identifier, position, width, height, "", scale, Align.center, color, parent);
         this.MAX_LENGTH = max_length;
         this.field_id = field_id;
         this.INPUT_RESTRICTIONS = input_restrictions;

@@ -17,14 +17,13 @@ import java.util.Set;
 public class BodyEditor {
 
     private final UIManager manager;
-    private final RigidBody body;
+    private RigidBody body;
 
     public Panel root;
 
-    public BodyEditor(UIManager manager, RigidBody body) {
+    public BodyEditor(UIManager manager) {
 
         this.manager = manager;
-        this.body = body;
 
         root = new Panel("body_editor_root", new Vector2(0, 0), 320, 220, new Color(0.2f, 0.2f, 0.2f, 1));
         new Panel("body_editor_drag", new Vector2(0, 0), 320, 40, new Color(0.4f, 0.4f, 0.4f, 1), root);
@@ -80,7 +79,22 @@ public class BodyEditor {
     }
 
     public void close() {
-        manager.remove_node(root);
+        root.hide();
         body.sleeping = false;
+    }
+
+    public void set_body(RigidBody body) {
+        this.body = body;
+    }
+
+    public RigidBody get_body() {
+        return this.body;
+    }
+
+    public void show() {
+        this.root.show();
+    }
+    public void hide() {
+        this.root.hide();
     }
 }

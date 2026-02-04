@@ -12,12 +12,17 @@ import io.github.neaproject.physics.shape.BoxShape;
 
 
 public class CreateBodyTool extends EditorTool {
-    public CreateBodyTool(Stage stage, UIManager manager) {
+    public CreateBodyTool(Stage stage, UIManager manager, BodyEditor body_editor) {
         super(stage, manager);
+        this.body_editor = body_editor;
     }
+
+    BodyEditor body_editor;
 
     @Override
     public void on_click(int button, MouseInfo info) {
+        if (!body_editor.root.is_invisible()) return;
+
         RigidBody b = new RigidBody(
             info.world_position,
             new Vector2(0, 0),
@@ -28,8 +33,10 @@ public class CreateBodyTool extends EditorTool {
         b.sleeping = true;
 
         stage.world.add_body(b);
-        BodyEditor body_editor = new BodyEditor(ui_manager, b);
+        body_editor.set_body(b);
+
         body_editor.root.set_position(info.screen_position.cpy().add(new Vector2(64, -48)));
+        body_editor.show();
     }
 
     @Override

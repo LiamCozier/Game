@@ -100,10 +100,12 @@ public abstract class Control {
 
     public void show() {
         show = true;
+        for (Control child: children) child.show();
     }
 
     public void hide() {
         show = false;
+        for (Control child: children) child.hide();
     }
 
     public int get_z() {return this.z_order;}

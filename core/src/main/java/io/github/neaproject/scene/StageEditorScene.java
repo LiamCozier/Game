@@ -43,6 +43,8 @@ public class StageEditorScene extends Scene {
     private void init_ui() {
         Panel sidebar = Sidebar.editor_tool_sidebar(toolbox);
 
+
+
         ui_manager.add_node(sidebar);
     }
 
@@ -84,11 +86,14 @@ public class StageEditorScene extends Scene {
         ));
 
         ui_manager = new UIManager();
+        body_editor = new BodyEditor(ui_manager);
+        body_editor.hide();
 
-        toolbox = new EditorToolbox(stage, editor_input, camera, ui_manager);
+        toolbox = new EditorToolbox(stage, editor_input, camera, ui_manager, body_editor);
         toolbox.set_tool(1);
 
         init_ui();
+
     }
 
     @Override
