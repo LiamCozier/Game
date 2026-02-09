@@ -313,15 +313,8 @@ public class PhysicsManager {
         // combine material properties
         float restitution = Math.max(body_a.restitution, body_b.restitution);
 
-        float static_friction = (float) Math.sqrt(
-            body_a.static_friction * body_a.static_friction +
-                body_b.static_friction * body_b.static_friction
-        );
-        float dynamic_friction = (float) Math.sqrt(
-            body_a.dynamic_friction * body_a.dynamic_friction +
-                body_b.dynamic_friction * body_b.dynamic_friction
-        );
-
+        float static_friction = (body_a.static_friction + body_b.static_friction) * 0.5f;
+        float dynamic_friction = (body_a.dynamic_friction + body_b.dynamic_friction) * 0.5f;
 
         // make sure impulse arrays exist and match contact count
         if (manifold.normal_impulses == null || manifold.normal_impulses.length != contact_count) {
@@ -348,9 +341,7 @@ public class PhysicsManager {
                 body_b.angular_velocity * rb.x
             );
 
-
             Vector2 relative_velocity = velocity_b_at_contact.cpy().sub(velocity_a_at_contact);
-
 
             // relative velocity along normal
             float contact_velocity_normal = relative_velocity.dot(normal);
@@ -378,7 +369,6 @@ public class PhysicsManager {
             // normal impulse
             float normal_impulse_scalar = -(1f + restitution) * contact_velocity_normal;
             normal_impulse_scalar /= inv_mass_sum;
-            normal_impulse_scalar /= contact_count;
 
             Vector2 normal_impulse = normal.cpy().scl(normal_impulse_scalar);
 
@@ -394,8 +384,6 @@ public class PhysicsManager {
             body_b.angular_velocity += rb_cross_jn * body_b.inv_inertia;
 
             manifold.normal_impulses[i] = normal_impulse_scalar;
-
-            // friction impulse
 
             // recompute velocities at contact after normal impulse
             velocity_a_at_contact = body_a.velocity.cpy().add(
@@ -436,10 +424,13 @@ public class PhysicsManager {
                 continue;
             }
 
+            if (Math.abs(contact_velocity_tangent) < 0f) {
+                continue; // no sliding
+            }
+
             // base friction impulse magnitude
             float tangent_impulse_scalar = -contact_velocity_tangent;
             tangent_impulse_scalar /= inv_mass_sum_tangent;
-            tangent_impulse_scalar /= contact_count;
 
             float max_static_friction_impulse = Math.abs(normal_impulse_scalar) * static_friction;
 
@@ -469,9 +460,9 @@ public class PhysicsManager {
 
     public static void resolve_position(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
 
-        final float slop = 0.001f;
-        final float percent = 0.5f;
-        final float max_correction = 0.2f;
+        final float slop = 0.01f;
+        final float percent = 0.3f;
+        final float max_correction = 0.15f;
 
         Vector2 normal = manifold.collision_normal.cpy();
         if (normal.len2() == 0f) return;

@@ -25,25 +25,13 @@ public class RigidBody extends Particle {
         this.angular_velocity = angular_velocity;
         this.mass = mass;
         this.inv_mass = (mass == 0f ? 0f : 1f / mass);
-        this.restitution = 0.4f;
+        this.restitution = 0.1f;
         this.static_friction = 0.8f;
-        this.dynamic_friction = 0.5f;
+        this.dynamic_friction = 0.45f;
 
         this.sleeping = false;
 
-        BoundingBox bounding_box = this.shape.get_bounding_box(position);
-        float width = bounding_box.get_width();
-        float height = bounding_box.get_height();
-        float width_sq = width * width;
-        float height_sq = height * height;
-
-        if (mass == 0f) {
-            this.inertia = 0f;
-            this.inv_inertia = 0f;
-        } else {
-            this.inertia = 0.0833f * mass * (width_sq + height_sq);
-            this.inv_inertia = 1f / this.inertia;
-        }
+        compute_inertia();
     }
 
     private Vector2 calc_midpoint(Vector2[] points) {
@@ -133,6 +121,7 @@ public class RigidBody extends Particle {
     public void physics_tick(float deltaT) {
         super.particle_tick(deltaT);
         orientation += angular_velocity * deltaT;
+        angular_velocity *= 0.999f;
     }
 
     public BoundingBox get_bounding_box() {
@@ -152,9 +141,26 @@ public class RigidBody extends Particle {
         return new BoundingBox(new Vector2(min_x, min_y), new Vector2(max_x, max_y));
     }
 
+    public void compute_inertia() {
+        if (mass == 0f) {
+            this.inertia = 0f;
+            this.inv_inertia = 0f;
+        } else {
+            BoundingBox bounding_box = this.shape.get_bounding_box(position);
+            float width = bounding_box.get_width();
+            float height = bounding_box.get_height();
+            float width_sq = width * width;
+            float height_sq = height * height;
+
+            this.inertia = 0.0833f * mass * (width_sq + height_sq);
+            this.inv_inertia = 1f / this.inertia;
+        }
+    }
+
     public void set_mass(float mass) {
         this.mass = mass;
         this.inv_mass = (mass == 0f ? 0f : 1f / mass);
+        compute_inertia();
     }
 
     public float get_mass() {

@@ -5,10 +5,10 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Switch extends Button {
 
-    private final int states;
-    private int current_state;
+    protected final int states;
+    protected int current_state;
 
-    private final Runnable[] state_actions;
+    protected final Runnable[] state_actions;
 
     public Switch(String identifier, Vector2 position, float width, float height, Color color, int states) {
         super(identifier, position, width, height, color);
