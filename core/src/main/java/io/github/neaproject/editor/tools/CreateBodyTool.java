@@ -32,7 +32,7 @@ public class CreateBodyTool extends EditorTool {
         );
         b.sleeping = true;
 
-        stage.world.add_body(b);
+        stage.add_body(b);
         body_editor.set_body(b);
 
         body_editor.root.set_position(info.screen_position.cpy().add(new Vector2(64, -48)));

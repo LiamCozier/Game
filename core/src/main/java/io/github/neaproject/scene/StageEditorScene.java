@@ -93,7 +93,7 @@ public class StageEditorScene extends Scene {
         stage = new Stage();
         running = false;
 
-        stage.world.add_body(new RigidBody(
+        stage.add_body(new RigidBody(
             new Vector2(0, -5),
             new Vector2(0, 0),
             new BoxShape(20, 1),

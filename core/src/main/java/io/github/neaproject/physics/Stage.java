@@ -4,16 +4,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import io.github.neaproject.physics.shape.BoxShape;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Stage {
 
-    public final PhysicsWorld world;
-
-    private int body_count;
+    private final PhysicsWorld world;
+    private final List<RigidBody> init_bodies;
 
     public Stage() {
         world = new PhysicsWorld();
+        init_bodies = new ArrayList<>(0);
 
         initialise();
     }
@@ -46,7 +48,6 @@ public class Stage {
             if (world_position.x >= bb.min.x && world_position.x <= bb.max.x &&
                 world_position.y >= bb.min.y && world_position.y <= bb.max.y) {
 
-                // precise test: point inside polygon
                 if (point_inside_polygon(world_position, body.get_polygon().vertices()))
                     return body;
             }
@@ -69,6 +70,15 @@ public class Stage {
             if (intersect) inside = !inside;
         }
         return inside;
+    }
+
+    public void add_body(RigidBody body) {
+        init_bodies.add(body);
+        reset_world();
+    }
+
+    public void reset_world() {
+        world.set_all_bodies(init_bodies);
     }
 
 }

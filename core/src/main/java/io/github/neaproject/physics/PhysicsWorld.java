@@ -1,7 +1,5 @@
 package io.github.neaproject.physics;
 
-import com.badlogic.gdx.math.Vector2;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +9,7 @@ public class PhysicsWorld {
     private static final int POSITIONAL_ITERATIONS = 4;
     private static final int SUBSTEPS = 4;
 
-    private final List<RigidBody> bodies;
+    private List<RigidBody> bodies;
     private final List<Contact> contacts;
 
     private static class Contact {
@@ -75,7 +73,7 @@ public class PhysicsWorld {
             int contact_count = contacts.size();
             if (contact_count == 0) continue;
 
-            for (int iter = 0; iter < VELOCITY_ITERATIONS; iter++) {
+            for (int i = 0; i < VELOCITY_ITERATIONS; i++) {
                 for (Contact c : contacts) {
 
                     CollisionManifold manifold = PhysicsManager.sat_overlap(
@@ -87,7 +85,7 @@ public class PhysicsWorld {
                 }
             }
 
-            for (int iter = 0; iter < POSITIONAL_ITERATIONS; iter++) {
+            for (int i = 0; i < POSITIONAL_ITERATIONS; i++) {
                 for (Contact c: contacts) {
 
                     CollisionManifold manifold = PhysicsManager.sat_overlap(
@@ -120,5 +118,9 @@ public class PhysicsWorld {
 
     public int get_body_count() {
         return bodies.size();
+    }
+
+    public void set_all_bodies(List<RigidBody> bodies) {
+        this.bodies = new ArrayList<RigidBody>(bodies);
     }
 }
