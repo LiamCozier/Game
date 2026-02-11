@@ -24,17 +24,11 @@ public class PlayPauseSwitch extends Switch {
         sr.setColor(new Color(1, 1, 1, 1));
         Vector2 position = this.position();
         if (current_state == 0) {
-            sr.triangle(
-                position.x + 48f, -position.y - height + 32f,
-                position.x + 16f, -position.y - height + 48f,
-                position.x + 16f, -position.y - height + 16f
-            );
+
         } else {
             float x = position.x + 18;
             float y = -position.y - height + 16;
 
-            sr.rect(x, y, 8, height - 32);
-            sr.rect(x + 20, y, 8, height - 32);
 
         }
     }

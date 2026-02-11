@@ -7,17 +7,23 @@ import com.badlogic.gdx.math.Vector2;
 import io.github.neaproject.UI.interfaces.Clickable;
 import io.github.neaproject.UI.interfaces.Hoverable;
 
-public class Button extends Control implements Hoverable, Clickable {
 
+public class Button extends Control implements Hoverable, Clickable {
     protected Color color, off_color, on_color;
     protected boolean hovering, pressing;
     protected Runnable click_action, release_action;
+    private IconRenderer icon_renderer;
+
+    public interface IconRenderer {
+        void shape_render(ShapeRenderer sr, Vector2 position);
+    }
 
     public Button(String identifier, Vector2 position, float width, float height, Color color) {
         super(identifier, width, height, position);
         this.color = color;
         off_color = new Color(color);
         on_color = color.cpy().add(0.1f, 0.1f, 0.1f, 1);
+        icon_renderer = null;
     }
 
     public Button(String identifier, Vector2 position, float width, float height, Color color, Control parent) {
@@ -30,8 +36,13 @@ public class Button extends Control implements Hoverable, Clickable {
     @Override
     public void shape_render(ShapeRenderer sr) {
         Vector2 position = this.position();
+        position.y = -position.y - height;
         sr.setColor(color);
-        sr.rect(position.x, -position.y-height, width, height);
+        sr.rect(position.x, position.y, width, height);
+        sr.setColor(Color.WHITE);
+        if (icon_renderer != null) {
+            icon_renderer.shape_render(sr, position);
+        }
     }
     @Override
     public void batch_render(SpriteBatch batch) {}
@@ -60,6 +71,7 @@ public class Button extends Control implements Hoverable, Clickable {
 
         if (click_action == null) return;
         click_action.run();
+        System.out.println(this.icon_renderer);
     }
 
     @Override
@@ -78,6 +90,10 @@ public class Button extends Control implements Hoverable, Clickable {
 
     public void set_release_action(Runnable r) {
         this.release_action = r;
+    }
+
+    public void set_icon_renderer(IconRenderer renderer) {
+        this.icon_renderer = renderer;
     }
 
 
