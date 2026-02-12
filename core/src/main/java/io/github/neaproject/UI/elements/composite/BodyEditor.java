@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Align;
 import io.github.neaproject.UI.UIManager;
 import io.github.neaproject.UI.elements.*;
 import io.github.neaproject.physics.RigidBody;
+import io.github.neaproject.physics.Stage;
 import io.github.neaproject.physics.shape.BoxShape;
 import org.w3c.dom.Text;
 
@@ -16,14 +17,13 @@ import java.util.Set;
 
 public class BodyEditor {
 
-    private final UIManager manager;
+    private final Stage stage;
     private RigidBody body;
 
     public Panel root;
 
-    public BodyEditor(UIManager manager) {
-
-        this.manager = manager;
+    public BodyEditor(UIManager manager, Stage stage) {
+        this.stage = stage;
 
         root = new Panel("body_editor_root", new Vector2(0, 0), 320, 220, new Color(0.2f, 0.2f, 0.2f, 1));
         new Panel("body_editor_drag", new Vector2(0, 0), 320, 40, new Color(0.4f, 0.4f, 0.4f, 1), root);
@@ -80,7 +80,8 @@ public class BodyEditor {
 
     public void close() {
         root.hide();
-        body.sleeping = false;
+        stage.add_body(body);
+        if (stage.is_running()) stage.pause();
     }
 
     public void set_body(RigidBody body) {

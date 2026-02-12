@@ -40,7 +40,6 @@ public class StageEditorScene extends Scene {
     // physics
     Stage stage;
     Switch pp_switch;
-    boolean running;
 
     private void init_ui() {
         Panel sidebar = Sidebar.editor_tool_sidebar(toolbox);
@@ -48,19 +47,24 @@ public class StageEditorScene extends Scene {
 
 
         ui_manager.add_node(sidebar);
-        pp_switch = (Switch) ui_manager.get_node("play_pause_switch");
         Button reset_button = (Button) ui_manager.get_node("reset_button");
+        reset_button.set_release_action(this::reset_simulation);
 
+        pp_switch = (Switch) ui_manager.get_node("play_pause_switch");
         pp_switch.set_state_action(0, this::play_simulation);
         pp_switch.set_state_action(1, this::pause_simulation);
     }
 
     public void pause_simulation() {
-        running = false;
+        stage.pause();
     }
 
     public void play_simulation() {
-        running = true;
+        stage.play();
+    }
+
+    public void reset_simulation() {
+        stage.reset_world();
     }
 
     @Override
@@ -91,7 +95,6 @@ public class StageEditorScene extends Scene {
         batch = new SpriteBatch();
 
         stage = new Stage();
-        running = false;
 
         stage.add_body(new RigidBody(
             new Vector2(0, -5),
@@ -102,7 +105,7 @@ public class StageEditorScene extends Scene {
         ));
 
         ui_manager = new UIManager();
-        body_editor = new BodyEditor(ui_manager);
+        body_editor = new BodyEditor(ui_manager, stage);
         body_editor.hide();
 
         toolbox = new EditorToolbox(stage, editor_input, camera, ui_manager, body_editor);
@@ -123,7 +126,7 @@ public class StageEditorScene extends Scene {
 
         if (!ui_manager.input_captured) toolbox.update();
 
-        if (running) stage.tick(dt);
+        stage.tick(dt);
 
     }
 

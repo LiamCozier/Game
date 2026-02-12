@@ -460,7 +460,7 @@ public class PhysicsManager {
 
     public static void resolve_position(RigidBody body_a, RigidBody body_b, CollisionManifold manifold) {
 
-        final float slop = 0.01f;
+        final float slop = 1e-4f;
         final float percent = 0.3f;
         final float max_correction = 0.15f;
 

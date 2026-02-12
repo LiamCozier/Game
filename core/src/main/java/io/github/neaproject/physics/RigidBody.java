@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import io.github.neaproject.physics.shape.Shape;
 
 public class RigidBody extends Particle {
+
     private Shape shape;
     public float orientation;
     public float angular_velocity;
@@ -25,13 +26,26 @@ public class RigidBody extends Particle {
         this.angular_velocity = angular_velocity;
         this.mass = mass;
         this.inv_mass = (mass == 0f ? 0f : 1f / mass);
-        this.restitution = 0.1f;
-        this.static_friction = 0.8f * 5;
-        this.dynamic_friction = 0.45f * 5;
+        this.restitution = 0.8f;
+        this.static_friction = 0.8f;
+        this.dynamic_friction = 0.45f;
 
         this.sleeping = false;
 
         compute_inertia();
+    }
+
+
+    public RigidBody cpy() {
+        return new RigidBody(
+            position.cpy(),
+            velocity.cpy(),
+            shape.cpy(),
+            orientation,
+            angular_velocity,
+            mass,
+            has_gravity
+        );
     }
 
     private Vector2 calc_midpoint(Vector2[] points) {

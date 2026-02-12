@@ -1,5 +1,7 @@
 package io.github.neaproject.physics;
 
+import com.badlogic.gdx.math.Vector2;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +35,7 @@ public class PhysicsWorld {
         int body_count = bodies.size();
         if (body_count == 0) return;
 
-        float sub_dt = delta_time / (float) SUBSTEPS;
+        float sub_dt = delta_time / SUBSTEPS;
 
         for (int s = 0; s < SUBSTEPS; s++) {
 
@@ -116,11 +118,20 @@ public class PhysicsWorld {
         return bodies.get(index);
     }
 
+    public int get_index_of_body(RigidBody body) {
+        return bodies.indexOf(body);
+    }
+
     public int get_body_count() {
         return bodies.size();
     }
 
-    public void set_all_bodies(List<RigidBody> bodies) {
-        this.bodies = new ArrayList<RigidBody>(bodies);
+    public void update_body(int index, Vector2 position, Vector2 velocity, float orientation, float angular_velocity) {
+        RigidBody body = bodies.get(index);
+        body.position.set(position);
+        body.velocity.set(velocity);
+        body.orientation = orientation;
+        body.angular_velocity = angular_velocity;
     }
+
 }

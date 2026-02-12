@@ -34,6 +34,11 @@ public class BoxShape extends Shape {
         );
     }
 
+    @Override
+    public Shape cpy() {
+        return new BoxShape(width, height);
+    }
+
     public float get_width() {
         return width;
     }

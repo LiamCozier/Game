@@ -10,6 +10,10 @@ public class Polygon {
         this.vertices = vertices;
     }
 
+    public Polygon cpy() {
+        return new Polygon(vertices);
+    }
+
     public Vector2[] vertices() {
         return vertices;
     }

@@ -12,10 +12,13 @@ public class Stage {
 
     private final PhysicsWorld world;
     private final List<RigidBody> init_bodies;
+    private boolean running;
 
     public Stage() {
         world = new PhysicsWorld();
         init_bodies = new ArrayList<>(0);
+
+        running = false;
 
         initialise();
     }
@@ -24,8 +27,7 @@ public class Stage {
     }
 
     public void tick(float dt) {
-        world.physics_tick(dt);
-
+        if (running) world.physics_tick(dt);
     }
 
     public void render(ShapeRenderer sr, SpriteBatch batch) {
@@ -74,11 +76,28 @@ public class Stage {
 
     public void add_body(RigidBody body) {
         init_bodies.add(body);
+        world.add_body(body.cpy());
         reset_world();
     }
 
     public void reset_world() {
-        world.set_all_bodies(init_bodies);
+        for (int i = 0; i<init_bodies.size(); i++) {
+            RigidBody body = init_bodies.get(i);
+            world.update_body(i, body.position, body.velocity, body.orientation, body.angular_velocity);
+        }
     }
+
+    public int world_index_of(RigidBody body) {
+        return world.get_index_of_body(body);
+    }
+
+    public RigidBody get_init_body(int index) {
+        return init_bodies.get(index);
+    }
+
+    public boolean is_running() {return running;}
+
+    public void play() {running = true;}
+    public void pause() {running = false;}
 
 }

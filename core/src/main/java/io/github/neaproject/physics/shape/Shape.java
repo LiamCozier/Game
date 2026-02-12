@@ -8,4 +8,5 @@ public abstract class Shape {
 
     public abstract Polygon get_polygon();
     public abstract BoundingBox get_bounding_box(Vector2 position);
+    public abstract Shape cpy();
 }

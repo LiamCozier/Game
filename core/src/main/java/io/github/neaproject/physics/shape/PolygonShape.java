@@ -32,4 +32,9 @@ public class PolygonShape extends Shape{
 
         return new BoundingBox(new Vector2(min_x, min_y), new Vector2(max_x, max_y));
     }
+
+    @Override
+    public Shape cpy() {
+        return new PolygonShape(this.polygon.vertices());
+    }
 }
