@@ -24,8 +24,8 @@ public class Sidebar {
         Button select_tool_button = new Button("select_tool_button", new Vector2(8, 80f), 64, 64, new Color(0.4f, 0.4f, 0.4f, 1), sidebar);
         select_tool_button.set_release_action(() -> toolbox.set_tool(EditorToolbox.SELECT_BODY));
         Switch play_pause_switch = new Switch("play_pause_switch", new Vector2(8, 152f), 64, 64, new Color(0.4f, 0.4f, 0.4f, 1), 2, sidebar);
-
         new Button("reset_button", new Vector2(8, 224f), 64, 64, new Color(0.4f, 0.4f, 0.4f, 1), sidebar);
+        new Button("save_button", new Vector2(8, 296f), 64, 64, new Color(0.4f, 0.4f, 0.4f, 1), sidebar);
 
         create_tool_button.set_icon_renderer(
             (ShapeRenderer sr, Vector2 position) -> {

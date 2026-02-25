@@ -5,7 +5,7 @@ import io.github.neaproject.physics.shape.Shape;
 
 public class RigidBody extends Particle {
 
-    private Shape shape;
+    private final Shape shape;
     public float orientation;
     public float angular_velocity;
     public boolean sleeping;
@@ -26,9 +26,9 @@ public class RigidBody extends Particle {
         this.angular_velocity = angular_velocity;
         this.mass = mass;
         this.inv_mass = (mass == 0f ? 0f : 1f / mass);
-        this.restitution = 0.8f;
-        this.static_friction = 0.8f;
-        this.dynamic_friction = 0.45f;
+        this.restitution = 0.4f;
+        this.static_friction = 0.5f;
+        this.dynamic_friction = 0.25f;
 
         this.sleeping = false;
 

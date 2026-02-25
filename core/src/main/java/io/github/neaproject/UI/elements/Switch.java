@@ -44,6 +44,12 @@ public class Switch extends Button {
         super.set_icon_renderer(this.state_renderers[current_state]);
     }
 
+    public void set_state(int state, boolean trigger) {
+        if (trigger) run_current_state();
+        this.current_state = state % states;
+        super.set_icon_renderer(this.state_renderers[current_state]);
+    }
+
     public void increment_state() {
         this.set_state(this.get_state()+1);
     }

@@ -17,6 +17,7 @@ import io.github.neaproject.input.UIInputProcessor;
 import io.github.neaproject.physics.RigidBody;
 import io.github.neaproject.physics.Stage;
 import io.github.neaproject.physics.shape.BoxShape;
+import io.github.neaproject.editor.StageSaveLoad;
 
 public class StageEditorScene extends Scene {
 
@@ -49,6 +50,8 @@ public class StageEditorScene extends Scene {
         ui_manager.add_node(sidebar);
         Button reset_button = (Button) ui_manager.get_node("reset_button");
         reset_button.set_release_action(this::reset_simulation);
+        Button save_button = (Button) ui_manager.get_node("save_button");
+        save_button.set_release_action(this::save_scene);
 
         pp_switch = (Switch) ui_manager.get_node("play_pause_switch");
         pp_switch.set_state_action(0, this::play_simulation);
@@ -65,6 +68,10 @@ public class StageEditorScene extends Scene {
 
     public void reset_simulation() {
         stage.reset_world();
+    }
+
+    public void save_scene() {
+        StageSaveLoad.save(stage, "scenes/scene.json");
     }
 
     @Override
@@ -130,6 +137,7 @@ public class StageEditorScene extends Scene {
 
     }
 
+
     @Override
     public void render() {
         // enable alpha channel
@@ -142,10 +150,20 @@ public class StageEditorScene extends Scene {
         batch.setProjectionMatrix(camera.combined);
         stage.render(sr, batch);
 
+        sync_play_pause_switch();
+
         sr.setProjectionMatrix(ui_camera.combined);
         batch.setProjectionMatrix(ui_camera.combined);
         ui_manager.render_all(sr, batch);
+    }
 
+    private void sync_play_pause_switch() {
+        if (pp_switch == null) return;
+
+        int desired_state = stage.is_running() ? 1 : 0;
+        if (pp_switch.get_state() != desired_state) {
+            pp_switch.set_state(desired_state, false);
+        }
     }
 
     @Override

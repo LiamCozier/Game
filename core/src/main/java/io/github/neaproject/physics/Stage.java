@@ -31,12 +31,40 @@ public class Stage {
     }
 
     public void render(ShapeRenderer sr, SpriteBatch batch) {
-        sr.begin(ShapeRenderer.ShapeType.Line);
+        sr.begin(ShapeRenderer.ShapeType.Filled);
         sr.setColor(Color.WHITE);
         for (RigidBody body: world.get_bodies()) {
-            sr.polygon(body.get_polygon().get_float_array());
+            fill_polygon(sr, body.get_polygon().vertices());
         }
         sr.end();
+        sr.begin(ShapeRenderer.ShapeType.Line);
+        sr.setColor(Color.BLACK);
+        for (RigidBody body: world.get_bodies()) {
+            outline_polygon(sr, body.get_polygon().get_float_array());
+        }
+        sr.end();
+    }
+
+    private void fill_polygon(ShapeRenderer sr, Vector2[] verts) {
+        if (verts == null || verts.length < 3) return;
+
+        Vector2 origin = verts[0];
+
+        for (int i = 1; i < verts.length - 1; i++) {
+            Vector2 v1 = verts[i];
+            Vector2 v2 = verts[i + 1];
+
+            sr.triangle(
+                origin.x, origin.y,
+                v1.x, v1.y,
+                v2.x, v2.y
+            );
+        }
+    }
+
+    private void outline_polygon(ShapeRenderer sr, float[] verts) {
+        if (verts == null || verts.length < 6) return;
+        sr.polygon(verts);
     }
 
     public RigidBody get_overlapping_body(Vector2 world_position) {
@@ -80,6 +108,10 @@ public class Stage {
         reset_world();
     }
 
+    public void add_runtime_body(RigidBody body) {
+        world.add_body(body);
+    }
+
     public void reset_world() {
         for (int i = 0; i<init_bodies.size(); i++) {
             RigidBody body = init_bodies.get(i);
@@ -95,9 +127,17 @@ public class Stage {
         return init_bodies.get(index);
     }
 
+    public int get_body_count() {
+        return init_bodies.size();
+    }
+
     public boolean is_running() {return running;}
 
     public void play() {running = true;}
     public void pause() {running = false;}
+
+    public PhysicsWorld get_world() {
+        return world;
+    }
 
 }
