@@ -37,4 +37,30 @@ public class PolygonShape extends Shape{
     public Shape cpy() {
         return new PolygonShape(this.polygon.vertices());
     }
+
+    public float get_area() {
+        Vector2[] verts = this.polygon.vertices();
+        int n = verts.length;
+
+        if (n < 3) return 0f;
+
+        float area = 0f;
+        Vector2 origin = verts[0];
+
+        for (int i = 1; i < n - 1; i++) {
+            Vector2 a = origin;
+            Vector2 b = verts[i];
+            Vector2 c = verts[i + 1];
+
+            float tri_area = 0.5f * (
+                a.x * (b.y - c.y) +
+                    b.x * (c.y - a.y) +
+                    c.x * (a.y - b.y)
+            );
+
+            area += tri_area;
+        }
+
+        return Math.abs(area);
+    }
 }

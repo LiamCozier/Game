@@ -20,9 +20,6 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
-        // temp
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) Gdx.app.exit();
-
         manager.scene.update(Gdx.graphics.getDeltaTime());
         manager.scene.render();
     }

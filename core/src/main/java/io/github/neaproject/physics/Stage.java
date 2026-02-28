@@ -34,6 +34,7 @@ public class Stage {
         sr.begin(ShapeRenderer.ShapeType.Filled);
         sr.setColor(Color.WHITE);
         for (RigidBody body: world.get_bodies()) {
+            sr.setColor(body.color);
             fill_polygon(sr, body.get_polygon().vertices());
         }
         sr.end();

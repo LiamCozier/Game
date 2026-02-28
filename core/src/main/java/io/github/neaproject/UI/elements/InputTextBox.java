@@ -139,7 +139,11 @@ public class InputTextBox extends TextBox implements Clickable, Focusable {
     }
 
     public void send_input() {
-        this.receiver.receive_input(field_id, input_text);
+        if (this.receiver != null) this.receiver.receive_input(field_id, input_text);
+    }
+
+    public String get_text() {
+        return super.get_text();
     }
 
 

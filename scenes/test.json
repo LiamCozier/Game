@@ -1,0 +1,96 @@
+{
+"bodies": [
+	{
+		"position": {
+			"x": 0,
+			"y": -5
+		},
+		"velocity": {
+			"x": 0,
+			"y": 0
+		},
+		"orientation": 0,
+		"angular_velocity": 0,
+		"mass": 0,
+		"has_gravity": false,
+		"restitution": 0.4,
+		"static_friction": 0.5,
+		"dynamic_friction": 0.25,
+		"shape": {
+			"type": "box",
+			"width": 20,
+			"height": 1,
+			"vertices": null
+		}
+	},
+	{
+		"position": {
+			"x": -5.2407413,
+			"y": 5.925926
+		},
+		"velocity": {
+			"x": 0,
+			"y": 0
+		},
+		"orientation": 0,
+		"angular_velocity": 0,
+		"mass": 1,
+		"has_gravity": true,
+		"restitution": 0.4,
+		"static_friction": 0.5,
+		"dynamic_friction": 0.25,
+		"shape": {
+			"type": "box",
+			"width": 1,
+			"height": 1,
+			"vertices": null
+		}
+	},
+	{
+		"position": {
+			"x": 0.12962979,
+			"y": 5.574074
+		},
+		"velocity": {
+			"x": 0,
+			"y": 0
+		},
+		"orientation": 0,
+		"angular_velocity": 0,
+		"mass": 1,
+		"has_gravity": true,
+		"restitution": 0.4,
+		"static_friction": 0.5,
+		"dynamic_friction": 0.25,
+		"shape": {
+			"type": "box",
+			"width": 1,
+			"height": 1,
+			"vertices": null
+		}
+	},
+	{
+		"position": {
+			"x": 4.5370383,
+			"y": 4.7407413
+		},
+		"velocity": {
+			"x": 0,
+			"y": 0
+		},
+		"orientation": 0,
+		"angular_velocity": 0,
+		"mass": 1,
+		"has_gravity": true,
+		"restitution": 0.4,
+		"static_friction": 0.5,
+		"dynamic_friction": 0.25,
+		"shape": {
+			"type": "box",
+			"width": 1,
+			"height": 1,
+			"vertices": null
+		}
+	}
+]
+}

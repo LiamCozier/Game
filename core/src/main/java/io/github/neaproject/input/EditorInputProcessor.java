@@ -25,7 +25,6 @@ public class EditorInputProcessor implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.ESCAPE) Gdx.app.exit();
         return false;
     }
 

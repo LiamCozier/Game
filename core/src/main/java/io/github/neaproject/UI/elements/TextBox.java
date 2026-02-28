@@ -16,10 +16,13 @@ public class TextBox extends Control{
     private GlyphLayout layout = new GlyphLayout();
     public int alignment;
 
+    String text;
+
     public TextBox(String identifier, Vector2 position, float width, float height, String text, float scale, int alignment, Color color) {
         super(identifier, width, height, position);
 
         this.alignment = alignment;
+        this.text = text;
 
         font = new BitmapFont(Gdx.files.internal("fonts/mono.fnt")); // loads all pages
 
@@ -44,7 +47,12 @@ public class TextBox extends Control{
     }
 
     public void set_text(String text) {
+        this.text = text;
         layout.setText(font, text, Color.WHITE, width, alignment, true);
+    }
+
+    public String get_text() {
+        return this.text;
     }
 
     @Override
@@ -53,7 +61,6 @@ public class TextBox extends Control{
     @Override
     public void batch_render(SpriteBatch batch) {
         Vector2 position = this.position();
-
         font.draw(batch, layout, (int) position.x, (int) (-position.y + layout.height/2 - height/2));
     }
 

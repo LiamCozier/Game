@@ -1,5 +1,6 @@
 package io.github.neaproject.physics;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import io.github.neaproject.physics.shape.Shape;
 
@@ -16,6 +17,7 @@ public class RigidBody extends Particle {
     public float restitution;
     public float static_friction;
     public float dynamic_friction;
+    public Color color;
 
     public RigidBody(Vector2 position, Vector2 velocity, Shape shape, float orientation, float angular_velocity, float mass, boolean has_gravity) {
 
@@ -31,13 +33,14 @@ public class RigidBody extends Particle {
         this.dynamic_friction = 0.25f;
 
         this.sleeping = false;
+        this.color = new Color(1f, 1f, 1f, 1f);
 
         compute_inertia();
     }
 
 
     public RigidBody cpy() {
-        return new RigidBody(
+        RigidBody cpy = new RigidBody(
             position.cpy(),
             velocity.cpy(),
             shape.cpy(),
@@ -46,6 +49,8 @@ public class RigidBody extends Particle {
             mass,
             has_gravity
         );
+        cpy.color = color;
+        return cpy;
     }
 
     private Vector2 calc_midpoint(Vector2[] points) {

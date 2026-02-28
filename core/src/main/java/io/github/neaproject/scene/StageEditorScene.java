@@ -17,7 +17,6 @@ import io.github.neaproject.input.UIInputProcessor;
 import io.github.neaproject.physics.RigidBody;
 import io.github.neaproject.physics.Stage;
 import io.github.neaproject.physics.shape.BoxShape;
-import io.github.neaproject.editor.StageSaveLoad;
 
 public class StageEditorScene extends Scene {
 
@@ -37,6 +36,8 @@ public class StageEditorScene extends Scene {
 
     EditorToolbox toolbox;
     BodyEditor body_editor;
+    SavePanel save_panel;
+    EscapeMenu escape_menu;
 
     // physics
     Stage stage;
@@ -45,17 +46,30 @@ public class StageEditorScene extends Scene {
     private void init_ui() {
         Panel sidebar = Sidebar.editor_tool_sidebar(toolbox);
 
-
-
         ui_manager.add_node(sidebar);
+
         Button reset_button = (Button) ui_manager.get_node("reset_button");
         reset_button.set_release_action(this::reset_simulation);
+
         Button save_button = (Button) ui_manager.get_node("save_button");
-        save_button.set_release_action(this::save_scene);
+        save_button.set_release_action(this::open_save_panel);
 
         pp_switch = (Switch) ui_manager.get_node("play_pause_switch");
         pp_switch.set_state_action(0, this::play_simulation);
         pp_switch.set_state_action(1, this::pause_simulation);
+    }
+
+    public void open_save_panel() {
+        save_panel.show();
+    }
+
+    public void toggle_escape_menu() {
+        if (!escape_menu.is_invisible()) {
+            escape_menu.hide();
+            stage.play();
+        } else {
+            escape_menu.show();
+        }
     }
 
     public void pause_simulation() {
@@ -68,10 +82,6 @@ public class StageEditorScene extends Scene {
 
     public void reset_simulation() {
         stage.reset_world();
-    }
-
-    public void save_scene() {
-        StageSaveLoad.save(stage, "scenes/scene.json");
     }
 
     @Override
@@ -97,7 +107,6 @@ public class StageEditorScene extends Scene {
         multiplexer.addProcessor(editor_input);
         Gdx.input.setInputProcessor(multiplexer);
 
-
         sr = new ShapeRenderer();
         batch = new SpriteBatch();
 
@@ -115,15 +124,24 @@ public class StageEditorScene extends Scene {
         body_editor = new BodyEditor(ui_manager, stage);
         body_editor.hide();
 
+        save_panel = new SavePanel(ui_manager, stage, manager);
+        save_panel.hide();
+
+        escape_menu = new EscapeMenu(ui_manager, stage, manager);
+        escape_menu.hide();
+
         toolbox = new EditorToolbox(stage, editor_input, camera, ui_manager, body_editor);
         toolbox.set_tool(1);
 
         init_ui();
-
     }
 
     @Override
     public void update(float dt) {
+
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
+            toggle_escape_menu();
+        }
 
         ui_input.begin_frame();
         editor_input.begin_frame();
@@ -131,7 +149,12 @@ public class StageEditorScene extends Scene {
         ui_manager.tick(dt);
         ui_manager.take_input(ui_input, ui_camera);
 
-        if (!ui_manager.input_captured) toolbox.update();
+        boolean escape_open = !escape_menu.is_invisible();
+        boolean body_editor_open = !body_editor.root.is_invisible();
+
+        if (!ui_manager.input_captured && !escape_open && !body_editor_open) {
+            toolbox.update();
+        }
 
         stage.tick(dt);
 

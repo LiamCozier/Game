@@ -52,7 +52,7 @@ public abstract class Control {
         if (this.parent == null) {
             return this.viewport_position.cpy();
         }
-        Vector2 parent = this.parent.viewport_position.cpy();
+        Vector2 parent = this.parent.position();
         return new Vector2(parent.x + viewport_position.x, parent.y + viewport_position.y);
     }
 

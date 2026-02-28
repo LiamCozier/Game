@@ -15,6 +15,8 @@ import io.github.neaproject.input.UIInputProcessor;
 import io.github.neaproject.physics.RigidBody;
 import io.github.neaproject.physics.Stage;
 import io.github.neaproject.physics.shape.BoxShape;
+import io.github.neaproject.physics.shape.PolygonShape;
+import io.github.neaproject.physics.shape.Shape;
 
 import java.util.Random;
 
@@ -61,10 +63,10 @@ public class MainMenuScene extends Scene {
         ui_manager.add_node(root_panel);
     }
 
-    private void spawn_box() {
+    private void spawn_shape() {
         Random r = new Random();
 
-        float x_vel = r.nextFloat(7.5f);
+        float x_vel = r.nextFloat(10f);
         float x = -20;
 
         if (r.nextBoolean()) {
@@ -72,13 +74,46 @@ public class MainMenuScene extends Scene {
             x_vel *= -1;
         }
 
-        stage.add_runtime_body(new RigidBody(
+        Shape shape = new BoxShape(1, 1);
+        float mass = 1f;
+        int s = r.nextInt(3);
+        switch (s) {
+            case 0:
+                float width = r.nextFloat(1.5f)+1;
+                float height = r.nextFloat(1.5f)+1;
+                shape = new BoxShape(width, height);
+                mass = width * height;
+                break;
+            case 1:
+                shape = new PolygonShape(new Vector2[] {
+                    new Vector2(0f, 1f).scl(r.nextFloat(1.5f)+1),
+                    new Vector2(0.866f, -0.5f).scl(r.nextFloat(1.5f)+1),
+                    new Vector2(-0.866f, -0.5f).scl(r.nextFloat(1.5f)+1)
+                });
+                mass = ((PolygonShape)shape).get_area();
+                break;
+            case 2:
+                int sides = r.nextInt(4)+5;
+                Vector2[] verts = new Vector2[sides];
+                int a=0;
+                float scl = r.nextFloat(1.5f)+1;
+                for (int i=0; i<sides; i++) {
+                    verts[i] = new Vector2((float) Math.sin(Math.toRadians(a)), (float) Math.cos(Math.toRadians(a))).scl(scl);
+                    a+=360/sides;
+                }
+                shape = new PolygonShape(verts);
+                mass = ((PolygonShape)shape).get_area();
+        }
+
+        RigidBody body = new RigidBody(
             new Vector2(x, 20),
             new Vector2(x_vel, r.nextFloat(10f)+5),
-            new BoxShape(r.nextFloat(2.5f)+1, r.nextFloat(2.5f)+1),
+            shape,
             0f, r.nextFloat(50f),
-            1f, true
-        ));
+            mass, true
+        );
+        body.color = new Color(1,1,1,1).fromHsv(r.nextFloat(360), 0.6f, 1);
+        stage.add_runtime_body(body);
     }
 
     private void cleanup_bodies() {
@@ -91,6 +126,28 @@ public class MainMenuScene extends Scene {
         }
     }
 
+    private Vector2 get_mouse_world() {
+        com.badlogic.gdx.math.Vector3 tmp = new com.badlogic.gdx.math.Vector3(
+            Gdx.input.getX(),
+            Gdx.input.getY(),
+            0f
+        );
+
+        camera.unproject(tmp);
+
+        return new Vector2(tmp.x, tmp.y);
+    }
+
+    private void push_bodies() {
+        RigidBody[] bodies = stage.get_world().get_bodies();
+
+        for (RigidBody body : bodies) {
+            Vector2 displacement = body.position.cpy().sub(get_mouse_world());
+            float impulse = 5f * body.get_inv_mass()/displacement.len2();
+            body.velocity.add(displacement.nor().scl(impulse));
+        }
+    }
+
     @Override
     public void on_open() {
         // cameras
@@ -98,6 +155,7 @@ public class MainMenuScene extends Scene {
         float ppu = Gdx.graphics.getHeight() / height;
         float width = Gdx.graphics.getWidth() / ppu;
         camera = new OrthographicCamera(width, height);
+
 
         float ui_height = 1080;
         float ui_ppu = Gdx.graphics.getHeight() / ui_height;
@@ -119,9 +177,9 @@ public class MainMenuScene extends Scene {
 
         // big slope
         stage.add_body(new RigidBody(
-            new Vector2(5f, -17f),
+            new Vector2(0f, -17f),
             new Vector2(0, 0),
-            new BoxShape(80f, 20f),
+            new BoxShape(70f, 20f),
             (float) Math.toRadians(-15f),
             0f, 0f,
              false
@@ -136,12 +194,13 @@ public class MainMenuScene extends Scene {
         ui_manager.take_input(ui_input, ui_camera);
 
         spawn_timer += dt;
-        if (spawn_timer > 0.175f) {
+        if (spawn_timer > 0.15f) {
             spawn_timer = 0f;
-            spawn_box();
+            spawn_shape();
         }
 
         stage.tick(dt);
+        push_bodies();
         cleanup_bodies();
     }
 
